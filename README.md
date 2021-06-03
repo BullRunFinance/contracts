@@ -1,7 +1,7 @@
 # BullRun Finance
 
-_Auto liquidity yield farm cross-chain with a full ecosystem compuesto de un farming, sistema de referidos, bridge, juegos y nfts._
-_El protocolo será deployado en varias chains, comenzando por BSC, Polygon y Fantom. Su Bridge proporionará a los usuarios la libertad de mover sus tokens BULL a través del protocolo en cualquier blockchain donde este esté._
+_Auto liquidity yield farm cross-chain with a full ecosystem composed of farming, referals,bridge, games and NFTs._
+_The protocol will be deployed in several chains, starting with BSC, Polygon and Fantom. The Bridge will allow the users agency to move their BULL tokens on any deployed chain._
 
 ## Main contracts
 
@@ -14,18 +14,18 @@ _El protocolo será deployado en varias chains, comenzando por BSC, Polygon y Fa
 * BullMarketplace: **under development**
 * BullNFT: [deploy after audits]
 
+## Overview core contracts
+
+_ * BullToken is the main protocol token, with a 5% tax on each tx and auto liquidity. It will be used to exchange nfts and cross between chains using the bridge. Modified to use the boosts provided by the nfts._
+_ * BullMasterchef is the contract that distributes BULL to the stakers. Modified to call RewardDistribution and accept nfts to increase APR or reduce harvestInterval._
+_ * RewardDistribution receives rewards and distributes them to the stakers of spcific pools on the masterchef._
+_ * BullLocker locks the liquidity provided by BullToken. This contrct has to be assigned to BullToken and the ownership needs to be transferred to a timelock._
+_ * BullNFT is the contract that manages the NFTs used by the protocol. It's in charge of managing minting an assigning the corresponding boosts._
+
 ## These contracts use 
 * @openzeppelin/contracts@4.1.0
 * @uniswap/v2-periphery@1.1.0-beta.0
 * @uniswap/v2-core@1.0.1
 
-## Overview core contracts
-
-_ * BullToken es el token principal del ecosistema, con tax de 5% en cada transacción y auto liquidity. Se utiliza para intercambiar nfts y cruzar entre chains mediante el bridge. Modificado para utilziar boosts de nfts._
-_ * BullMasterchef es el encargado de recompensar con Bull a los stakers. Modificado para llamar a RewardDistribution y aceptar nfts que aumentan el APR o reducen el harvestInterval._
-_ * RewardDistribution recibe recompensas y las distribuye entre los stakers de determinados pools en el masterchef._
-_ * BullLocker lockea la liquidez formada por BullToken. Este contrato debe estar asignado a BullToken y su ownership debe transferirse a un timelock._
-_ * BullNFT es el contrato de los NFTs utilizados en el ecosistema. Es el encargado de manejar su minteo y asignar los boosts correspondientes._
-
 ---
-BullToken, BullMasterchef, BullReferral and BullLocker son forks de  [PantherSwap](https://github.com/pantherswap/panther-farm) con mayores o menores cambios para auemntar la seguridad y los casos de usos.
+BullToken, BullMasterchef, BullReferral and BullLocker are forks from  [PantherSwap](https://github.com/pantherswap/panther-farm) with changes applied to them to increase security and usability.
