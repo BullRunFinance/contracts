@@ -1,18 +1,18 @@
 # BullRun Finance
 
-_Auto liquidity yield farm cross-chain with a full ecosystem composed of farming, referals,bridge, games and NFTs._
-_The protocol will be deployed in several chains, starting with BSC, Polygon and Fantom. The Bridge will allow the users agency to move their BULL tokens on any deployed chain._
+Auto liquidity yield farm cross-chain with a full ecosystem composed of farming, referals,bridge, games and NFTs.
+The protocol will be deployed in several chains, starting with BSC, Polygon and Fantom. The Bridge will allow the users agency to move their BULL tokens on any deployed chain.
 
 ## Main contracts
 
-* BullToken: [deploy after audits]
-* BullMasterchef: [deploy after audits]
-* RewardDistribution: [deploy after audits]
-* BullReferral: [deploy after audits]
-* BullLocker: [deploy after audits]
-* BullBridge: [deploy after audits]
-* BullMarketplace: **under development**
-* BullNFT: [deploy after audits]
+* **BullToken**: [deploy after audits]()
+* **BullMasterchef**: [deploy after audits]()
+* **RewardDistribution**: [deploy after audits]()
+* **BullReferral**: [deploy after audits]()
+* **BullLocker**: [deploy after audits]()
+* **BullBridge**: [deploy after audits]()
+* **BullMarketplace**: [under development]()
+* **BullNFT**: [deploy after audits]()
 
 ## Overview core contracts
 
