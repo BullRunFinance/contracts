@@ -8,6 +8,11 @@ import "./interfaces/IBullNFT.sol";
 import "./libs/BEP20.sol";
 import "./libs/BullGovernance.sol";
 
+/** 
+ *   @dev Main token of the protocol. Auto liquidity and burn. 
+ *   In each transaction it charges a fee (by default 5%) for the formation of new LP tokens and to burn a part of bull.
+ */
+
 // BullToken with Governance.
 contract BullToken is BEP20, BullGovernance {
     using SafeMath for uint256;
@@ -33,6 +38,8 @@ contract BullToken is BEP20, BullGovernance {
     uint256 public minAmountToLiquify = 500 ether;
     // The swap router, modifiable
     IUniswapV2Router02 public bullSwapRouter;
+    // LP Locker
+    address lpLocker;
     // The trading pair
     address public bullSwapPair;
     // In swap and liquify
@@ -87,6 +94,7 @@ contract BullToken is BEP20, BullGovernance {
 
     constructor() public BEP20("BullSwap Token", "BULL") BullGovernance(address(this)) {
         _operator = _msgSender();
+        lpLocker = _msgSender();
         emit OperatorTransferred(address(0), _operator);
 
         _excludedFromAntiWhale[msg.sender] = true;
@@ -212,7 +220,7 @@ contract BullToken is BEP20, BullGovernance {
             tokenAmount,
             0, // slippage is unavoidable
             0, // slippage is unavoidable
-            operator(),
+            lpLocker,
             block.timestamp
         );
     }
@@ -322,6 +330,14 @@ contract BullToken is BEP20, BullGovernance {
      */
     function updateBullNFTContract(address _bullNFT) external onlyOperator {
         bullNFT = IBullNFT(_bullNFT);
+    }
+
+    /**
+     * @dev Update the lpLocker.
+     * Can only be called by the current operator.
+     */
+    function updateLpLocker(address _lpLocker) external onlyOperator {
+        lpLocker = _lpLocker;
     }
 
     /**
