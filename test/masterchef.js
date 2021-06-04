@@ -69,14 +69,6 @@ contract("Masterchef", ([owner, investor, referrer]) => {
       await bullToken.setExcludedFromAntiWhale(masterchef.address, true)
       assert.equal(await bullToken.isExcludedFromAntiWhale(masterchef.address), true)
     })
-
-    // Armar LP BULL-BNB
-    // Excluir LP de antiwhale
-    // Excluir pancakeRouter de antiwhale
-    /******************* ****/
-    // Asignar a bull.bullSwapRouter = pancakeRouter
-    // Asignar a bull.bullSwapPair = ???
-    /************************ */
   })
 
   describe("Config distribution contract", async() => {

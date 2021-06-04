@@ -8,10 +8,6 @@ const TestToken = artifacts.require("TestToken");
 const Masterchef = artifacts.require("Masterchef");
 const RewardDistribution = artifacts.require("RewardDistribution");
 const BullReferral = artifacts.require("BullReferral");
-const BullRun = artifacts.require("BullRun");
-const BullPrediction = artifacts.require("BullPrediction");
-// const OraclePrice = artifacts.require("OraclePrice");
-const FalseOracle = artifacts.require("FalseOracle");
 const BullNFT = artifacts.require("BullNFT");
 
 module.exports = async function (deployer, network, accounts) {
@@ -36,14 +32,4 @@ module.exports = async function (deployer, network, accounts) {
   const rewardDistribution = await RewardDistribution.deployed();
 
   await deployer.deploy(BullReferral);
-
-  await deployer.deploy(BullRun, accounts[1]);
-
-/*  await deployer.deploy(OraclePrice, lpWallet, bullToken.address, busdToken.address)
-  const oraclePrice = await OraclePrice.deployed();*/
-
-  await deployer.deploy(FalseOracle);
-  const falseOracle = await FalseOracle.deployed();
-
-  await deployer.deploy(BullPrediction, bullToken.address, falseOracle.address, operator, 300, 60, "1000000000000000");
 };
