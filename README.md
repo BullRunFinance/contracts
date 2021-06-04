@@ -16,11 +16,11 @@ The protocol will be deployed in several chains, starting with BSC, Polygon and 
 
 ## Overview core contracts
 
-- BullToken is the main protocol token, with a 5% tax on each tx and auto liquidity. It will be used to exchange nfts and cross between chains using the bridge. Modified to use the boosts provided by the nfts._
-- BullMasterchef is the contract that distributes BULL to the stakers. Modified to call RewardDistribution and accept nfts to increase APR or reduce harvestInterval._
-- RewardDistribution receives rewards and distributes them to the stakers of spcific pools on the masterchef._
-- BullLocker locks the liquidity provided by BullToken. This contrct has to be assigned to BullToken and the ownership needs to be transferred to a timelock._
-- BullNFT is the contract that manages the NFTs used by the protocol. It's in charge of managing minting an assigning the corresponding boosts._
+- BullToken is the main protocol token, with a 5% tax on each tx and auto liquidity. It will be used to exchange nfts and cross between chains using the bridge. Modified to use the boosts provided by the nfts.
+- BullMasterchef is the contract that distributes BULL to the stakers. Modified to call RewardDistribution and accept nfts to increase APR or reduce harvestInterval.
+- RewardDistribution receives rewards and distributes them to the stakers of spcific pools on the masterchef.
+- BullLocker locks the liquidity provided by BullToken. This contrct has to be assigned to BullToken and the ownership needs to be transferred to a timelock.
+- BullNFT is the contract that manages the NFTs used by the protocol. It's in charge of managing minting an assigning the corresponding boosts.
 
 ## These contracts use 
 * @openzeppelin/contracts@4.1.0

@@ -6,7 +6,7 @@ import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "./interfaces/IBullNFT.sol";
 import "./libs/BEP20.sol";
-import "./libs/BullGovernance.sol";
+import "./BullGovernance.sol";
 
 /** 
  *   @dev Main token of the protocol. Auto liquidity and burn. 
