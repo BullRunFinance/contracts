@@ -5,7 +5,7 @@ pragma solidity 0.8.0;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "./libs/SafeBEP20.sol";
-import "./Bulltoken.sol";
+import "./BullToken.sol";
 import "./RewardDistribution.sol";
 import "./interfaces/IBullReferral.sol";
 import "./interfaces/IBullNFT.sol";

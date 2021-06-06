@@ -76,8 +76,6 @@ contract("Masterchef with NFTs", ([owner, investor, referrer]) => {
     })
 
     it("update nfts miner to masterchef", async() => {
-      await bullNFT.updateMiner(bullseye, masterchef.address)
-      await bullNFT.updateMiner(missedBull, masterchef.address)
       await bullNFT.updateMiner(bullFarmer, masterchef.address)
 
       assert.equal(await bullNFT.getAuthorizedMiner(bullseye), masterchef.address, "Masterchef isn't the bullseye boost miner")
