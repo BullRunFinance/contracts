@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
+pragma solidity 0.8.4;
+
 import "./libs/IBEP20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
-pragma solidity 0.8.0;
 
     // Copied and modified from YAM code:
     // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernanceStorage.sol

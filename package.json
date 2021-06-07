@@ -1,0 +1,27 @@
+{
+  "name": "contracts",
+  "version": "1.0.0",
+  "description": "Auto liquidity yield farm cross-chain with a full ecosystem composed of farming, referals,bridge, games and NFTs.\r The protocol will be deployed in several chains, starting with BSC, Polygon and Fantom. The Bridge will allow the users agency to move their BULL tokens on any deployed chain.",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BullRunFinance/contracts/issues"
+  },
+  "homepage": "https://github.com/BullRunFinance/contracts#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.1.0",
+    "@openzeppelin/test-helpers": "^0.5.11",
+    "@truffle/hdwallet-provider": "^1.4.0",
+    "@uniswap/v2-core": "^1.0.1",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "chai": "^4.3.4",
+    "chai-as-promised": "^7.1.1"
+  }
+}

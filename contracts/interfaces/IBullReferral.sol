@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: Unlicensed
+// SPDX-License-Identifier: MIT
 
 // File: contracts/libs/IBullReferral.sol
 
-pragma solidity 0.8.0;
+pragma solidity >=0.4.0;
 
 interface IBullReferral {
     /**

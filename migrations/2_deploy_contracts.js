@@ -22,9 +22,14 @@ function toEth(n){
 
 module.exports = async function (deployer, network, accounts) {
   const INT_MAX = "115792089237316195423570985008687907853269984665640564039457584007913129639935"
-  const owner = "0x4363d1ECdb8818C698981f65A7053AeDF576B1dC"
+/*  const owner = "0x4363d1ECdb8818C698981f65A7053AeDF576B1dC"
   const operator = "0x27e74B3c51e68dD4C5E456fedC1ae4A0b90D02ec"
-  const nacho = "0x3a640273A4a62F7C2C9B903916D15D22FE77d356"
+  const tester = "0x3a640273A4a62F7C2C9B903916D15D22FE77d356"*/
+
+  const owner = accounts[0]
+  const operator = accounts[1]
+  const tester = accounts[2]
+
   const goldenBull = 1;
   const silverBull = 2;
   const bronzeBull = 3;
@@ -72,13 +77,13 @@ module.exports = async function (deployer, network, accounts) {
 
   // Mintear NFTs (testing)
   await bullNFT.mint(bullFarmer, owner);
-  await bullNFT.mint(bullFarmer, nacho);
+  await bullNFT.mint(bullFarmer, tester);
 
   await bullNFT.updateMiner(bullFarmer, masterchef.address);
 
   // Mintear tokens
   await bullToken.mint(owner, toWei('5000000'))
-  await bullToken.mint(nacho, toWei('10000'))
+  await bullToken.mint(tester, toWei('10000'))
   await busdToken.mint(owner, toWei('1000000'))
 
   // Depositar rewards

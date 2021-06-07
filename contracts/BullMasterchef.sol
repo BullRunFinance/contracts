@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.0;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
@@ -9,7 +9,6 @@ import "./BullToken.sol";
 import "./RewardDistribution.sol";
 import "./interfaces/IBullReferral.sol";
 import "./interfaces/IBullNFT.sol";
-
 
 // MasterChef is the master of Bull. He can make Bull and he is a fair guy.
 //
