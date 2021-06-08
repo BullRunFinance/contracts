@@ -38,7 +38,7 @@ contract BullBridge is Ownable, Pausable {
     // NFT address to manage boosts by BullNFTs
     IBullNFT public bullNFT;
     // NFT boostId
-    uint256 theBigBull = 10;
+    uint256 theBigBull = 9;
     // History of bull token transfered by the user in the bridge
     mapping(address => uint256) bullTransfered;
 

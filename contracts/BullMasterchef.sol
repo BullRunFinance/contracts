@@ -90,11 +90,10 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     // NFT address to manage boosts by BullNFTs.
     IBullNFT public bullNFT;
     // NFTs boostsId bonus.
-    uint256 thePatientBull = 4;
-    uint256 thePersistentBull = 5;
-    uint256 bullseye = 6;
-    uint256 missedBull = 7;
-    uint256 bullFarmer = 9;
+    uint256 thePersistentBull = 4;
+    uint256 bullseye = 5;
+    uint256 missedBull = 6;
+    uint256 bullFarmer = 8;
     // Conditions to mint new nfts
     uint256 constant private TWO_DAYS = 2 days;  
     uint256 constant private MINIMUM_REWARDS_FOR_NFT = 100 * 10**18;
@@ -315,8 +314,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
 
         if(user.nftId > 0){
             uint256 boostId = bullNFT.getBoost(user.nftId);
-            if(boostId == thePatientBull ||
-            boostId == thePersistentBull){
+            if(boostId == thePersistentBull){
                 harvestInterval = harvestInterval > bullNFT.getBonus(boostId) ? harvestInterval.sub(bullNFT.getBonus(boostId)) : 0;
             }
         }

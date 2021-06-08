@@ -27,9 +27,9 @@ contract("Masterchef with NFTs", ([owner, investor, referrer]) => {
   let blockNumber
   let INT_MAX = "115792089237316195423570985008687907853269984665640564039457584007913129639935"
   let bullNFT, bullToken, busdToken, masterchef, rewardDistribution, bullReferral, testToken
-  let bullseye = 6;
-  let missedBull = 7;
-  let bullFarmer = 9;
+  let bullseye = 5;
+  let missedBull = 6;
+  let bullFarmer = 8;
 
   before(async() =>{
     bullToken = await BullToken.new()
@@ -44,7 +44,7 @@ contract("Masterchef with NFTs", ([owner, investor, referrer]) => {
 
   describe("Create NFTs", async() => {
     it("create boosts", async() =>{
-      for(let i = 0; i <5; i++){
+      for(let i = 0; i <4; i++){
         await bullNFT.createBoost(masterchef.address, 10, 0);
       }
       await bullNFT.createBoost(owner, 10, 1000);
@@ -52,7 +52,7 @@ contract("Masterchef with NFTs", ([owner, investor, referrer]) => {
       await bullNFT.createBoost(masterchef.address, 10, 0);
       await bullNFT.createBoost(owner, 10, 2000);
 
-      assert.equal((await bullNFT.nextBoostId()).toString(), "10", "Boosts creation error")
+      assert.equal((await bullNFT.nextBoostId()).toString(), "9", "Boosts creation error")
     })
 
     it("mint first nfts", async() =>{
