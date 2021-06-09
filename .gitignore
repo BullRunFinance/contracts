@@ -1,4 +1,4 @@
 build/contracts
 node_modules
 .secret
-contracts/oracles/OraclePrice.sol
+contracts/BullMarketplace.sol
