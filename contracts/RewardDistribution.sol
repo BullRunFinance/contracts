@@ -39,23 +39,24 @@ contract RewardDistribution is Ownable {
     // Info of each pool.
     struct PoolInfo {
         IBEP20 lpToken;           // Address of LP token contract.
-        uint256 allocPoint;       // How many allocation points assigned to this pool. Rewards to distribute per block.
         uint256 lastRewardBlock;  // Last block number that Rewards distribution occurs.
         uint256 accRewardTokenPerShare; // Accumulated Rewards per share, times 1e30. See below.
+        uint32 allocPoint;       // How many allocation points assigned to this pool. Rewards to distribute per block.
+
     }
 
     // Info of each pool.
-    mapping(uint256 => PoolInfo) public poolInfo;
+    mapping(uint16 => PoolInfo) public poolInfo;
     // Pids of pools added from masterchef
-    uint256[] public poolPids;
+    uint16[] public poolPids;
     // Info of each user that stakes LP tokens.
-    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
+    mapping(uint16 => mapping(address => UserInfo)) public userInfo;
     // Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 private totalAllocPoint = 0;
     // The block number when Reward distribution starts.
     uint256 public startBlock;
     // Reward tokens distributed per block
-    uint256 public rewardPerBlock;
+    uint128 public rewardPerBlock;
     // Last block when distribution rewards ends
     uint256 public endBlockRewards;
     // Reward token from fees to Liquidity providers
@@ -94,7 +95,7 @@ contract RewardDistribution is Ownable {
     }
 
     /// @dev Add a new lp to the pool. Can only be called by the owner.
-    function add(IBEP20 _lpToken, bool _withUpdate, uint256 _pid) public onlyOwnerOrMasterchef nonDuplicated(_pid) {
+    function add(IBEP20 _lpToken, bool _withUpdate, uint16 _pid) public onlyOwnerOrMasterchef nonDuplicated(_pid) {
         if (_withUpdate) {
             massUpdatePools();
         }
@@ -122,7 +123,7 @@ contract RewardDistribution is Ownable {
     }
 
     /// @return Returns the pending Reward of the _user.
-    function pendingReward(uint256 _pid, address _user) external view returns (uint256) {
+    function pendingReward(uint16 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accRewardTokenPerShare = pool.accRewardTokenPerShare;
@@ -136,7 +137,7 @@ contract RewardDistribution is Ownable {
     }
 
     /// @dev Update reward variables of the given pool to be up-to-date.
-    function updatePool(uint256 _pid) public {
+    function updatePool(uint16 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
         if (block.number <= pool.lastRewardBlock) {
             return;
@@ -156,7 +157,7 @@ contract RewardDistribution is Ownable {
     /// @dev Update reward variables for all pools. Be careful of gas spending!
     function massUpdatePools() public {
         uint256 length = poolPids.length;
-        for (uint256 pid = 0; pid < length; pid++) {
+        for (uint16 pid = 0; pid < length; pid++) {
             updatePool(poolPids[pid]);
         }
     }
@@ -171,7 +172,7 @@ contract RewardDistribution is Ownable {
     /// It assumes that there is no fee involved. It it's, the masterchef should send the amount after fees.
     /// @param _amount The amount to increment the balance
     /// @param _pid Pool identifier
-    function incrementBalance(uint256 _pid,uint256 _amount, address _user) public onlyMasterchef{
+    function incrementBalance(uint16 _pid,uint256 _amount, address _user) public onlyMasterchef{
         require(poolExistence[_pid], "pool not found");
         require(_amount > 0, "IncrementBalance error: amount should be more than zero.");
         PoolInfo storage pool = poolInfo[_pid];
@@ -185,7 +186,7 @@ contract RewardDistribution is Ownable {
     /// Reduce balance into the contract
     /// @param _amount The amount to reduce the balance
     /// @param _pid Pool identifier
-    function reduceBalance(uint256 _pid, uint256 _amount, address _user) public onlyMasterchef{
+    function reduceBalance(uint16 _pid, uint256 _amount, address _user) public onlyMasterchef{
         require(_amount > 0, "ReduceBalance error: amount should be more than zero.");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
@@ -204,7 +205,7 @@ contract RewardDistribution is Ownable {
     /// Wthdraw rewards
     /// Separated logic of any other withdraw() or reduceBalance() function to be more adaptable to the masterchef condition, as harvest intervals
     /// @param _pid Pool identifier
-    function harvest(uint256 _pid, address _user) public onlyMasterchef{
+    function harvest(uint16 _pid, address _user) public onlyMasterchef{
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         updatePool(_pid);
@@ -244,7 +245,7 @@ contract RewardDistribution is Ownable {
     function updateRewardPerBlock() internal{
         uint256 rewardsAvailable = rewardToken.balanceOf(address(this)).sub(assignedRewards);
         require(block.number < endBlockRewards, "Rewards distribution finished");
-        rewardPerBlock = rewardsAvailable.div(endBlockRewards.sub(block.number));
+        rewardPerBlock = uint128(rewardsAvailable.div(endBlockRewards.sub(block.number)));
     }
 
     /// @dev Update last block to distribute rewards.

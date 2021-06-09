@@ -26,10 +26,10 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
         uint256 amount;         // How many LP tokens the user has provided.
         uint256 rewardDebt;     // Reward debt. See explanation below.
         uint256 rewardLockedUp;  // Reward locked up.
-        uint256 nextHarvestUntil; // When can the user harvest again.
         uint256 strength; // If the user don't despoit any nft, it's equal to amount.
         uint256 nftId; // Nft of the user if has one.
-        uint256 lastHarvest; // Last time the user deposited or harvested.
+        uint64 nextHarvestUntil; // When can the user harvest again.
+        uint64 lastHarvest; // Last time the user deposited or harvested.
         /** 
          * We do some fancy math here. Basically, any point in time, the amount of BULLs
          * entitled to a user but is pending to be distributed is:
@@ -48,12 +48,12 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     // Info of each pool.
     struct PoolInfo {
         IBEP20 lpToken;            // Address of LP token contract.
-        uint256 allocPoint;        // How many allocation points assigned to this pool. BULLs to distribute per block.
         uint256 lastRewardBlock;   // Last block number that BULLs distribution occurs.
         uint256 accBullPerShare;  // Accumulated BULLs per share, times 1e12. See below.
-        uint16 depositFeeBP;       // Deposit fee in basis points.
-        uint256 harvestInterval;   // Harvest interval in seconds.
         uint256 totalStrength;     // Represents the shares of the users.
+        uint32 allocPoint;        // How many allocation points assigned to this pool. BULLs to distribute per block.
+        uint32 harvestInterval;   // Harvest interval in seconds.
+        uint16 depositFeeBP;       // Deposit fee in basis points.
     }
 
     // The BULL TOKEN!
@@ -63,16 +63,14 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     // Deposit Fee address
     address public feeAddress;
     // BULL tokens created per block.
-    uint256 public bullPerBlock;
-    // Bonus muliplier for early bull makers.
-    uint256 public constant BONUS_MULTIPLIER = 1;
+    uint128 public bullPerBlock;
     // Max harvest interval: 7 days.
     uint256 public constant MAXIMUM_HARVEST_INTERVAL = 7 days;
 
     // Info of each pool.
     PoolInfo[] public poolInfo;
     // Info of each user that stakes LP tokens.
-    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
+    mapping(uint16 => mapping(address => UserInfo)) public userInfo;
     // Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
     // The block number when BULL mining starts.
@@ -87,16 +85,16 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     uint16 public referralCommissionRate = 200;
     // Max referral commission rate: 10%.
     uint16 public constant MAXIMUM_REFERRAL_COMMISSION_RATE = 1000;
+    // NFTs boostsId bonus.
+    uint8 thePersistentBull = 4;
+    uint8 bullseye = 5;
+    uint8 missedBull = 6;
+    uint8 bullFarmer = 8;
+    // Conditions to mint new nfts
+    uint32 constant private TWO_DAYS = 2 days;  
+    uint256 constant private MINIMUM_REWARDS_FOR_NFT = 100 * 10**18;
     // NFT address to manage boosts by BullNFTs.
     IBullNFT public bullNFT;
-    // NFTs boostsId bonus.
-    uint256 thePersistentBull = 4;
-    uint256 bullseye = 5;
-    uint256 missedBull = 6;
-    uint256 bullFarmer = 8;
-    // Conditions to mint new nfts
-    uint256 constant private TWO_DAYS = 2 days;  
-    uint256 constant private MINIMUM_REWARDS_FOR_NFT = 100 * 10**18;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
@@ -112,7 +110,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
         BullToken _bull,
         IBullNFT _bullNFT,
         address _feeAddress,
-        uint256 _bullPerBlock,
+        uint128 _bullPerBlock,
         uint256 _startBlock
     ) public {
         bull = _bull;
@@ -141,7 +139,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Add a new lp to the pool. If _withRewards is true also add the same pool to rewardDistribution contract. Can only be called by the owner.
-    function add(uint256 _allocPoint, IBEP20 _lpToken, uint16 _depositFeeBP, uint256 _harvestInterval, bool _withUpdate, bool _withRewards) public onlyOwner nonDuplicated(_lpToken) {
+    function add(uint32 _allocPoint, IBEP20 _lpToken, uint16 _depositFeeBP, uint32 _harvestInterval, bool _withUpdate, bool _withRewards) public onlyOwner nonDuplicated(_lpToken) {
         require(_depositFeeBP <= 1500, "add: deposit fee can't be more than 15%");
         require(_harvestInterval <= MAXIMUM_HARVEST_INTERVAL, "add: invalid harvest interval");
         if (_withUpdate) {
@@ -160,13 +158,13 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
             totalStrength: 0
         }));
         if(_withRewards){
-            uint256 pid = poolInfo.length.sub(1);
+            uint16 pid = uint16(poolInfo.length - 1);
             rewardDistribution.add(_lpToken, true, pid);
         }   
     }
 
     /// @dev Update the given pool's BULL allocation point and deposit fee. Can only be called by the owner.
-    function set(uint256 _pid, uint256 _allocPoint, uint16 _depositFeeBP, uint256 _harvestInterval, bool _withUpdate) public onlyOwner {
+    function set(uint256 _pid, uint32 _allocPoint, uint16 _depositFeeBP, uint32 _harvestInterval, bool _withUpdate) public onlyOwner {
         require(_depositFeeBP <= 10000, "set: invalid deposit fee basis points");
         require(_harvestInterval <= MAXIMUM_HARVEST_INTERVAL, "set: invalid harvest interval");
         if (_withUpdate) {
@@ -178,18 +176,13 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
         poolInfo[_pid].harvestInterval = _harvestInterval;
     }
 
-    /// @return Return the reward multiplier over the given _from to _to block.
-    function getMultiplier(uint256 _from, uint256 _to) public pure returns (uint256) {
-        return _to.sub(_from).mul(BONUS_MULTIPLIER);
-    }
-
     /// @return Return the pending BULLs of the given _user.
-    function pendingBull(uint256 _pid, address _user) external view returns (uint256) {
+    function pendingBull(uint16 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accBullPerShare = pool.accBullPerShare;
         if (block.number > pool.lastRewardBlock && pool.totalStrength != 0) {
-            uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
+            uint256 multiplier = block.number.sub(pool.lastRewardBlock);
             uint256 bullReward = multiplier.mul(bullPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
             accBullPerShare = accBullPerShare.add(bullReward.mul(1e12).div(pool.totalStrength));
         }
@@ -198,7 +191,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @return Return if _user can harvest BULLs.
-    function canHarvest(uint256 _pid, address _user) public view returns (bool) {
+    function canHarvest(uint16 _pid, address _user) public view returns (bool) {
         UserInfo storage user = userInfo[_pid][_user];
         return block.timestamp >= user.nextHarvestUntil;
     }
@@ -221,7 +214,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
             pool.lastRewardBlock = block.number;
             return;
         }
-        uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
+        uint256 multiplier = block.number.sub(pool.lastRewardBlock);
         uint256 bullReward = multiplier.mul(bullPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
         bull.mint(devAddress, bullReward.div(10));
         bull.mint(address(this), bullReward);
@@ -230,7 +223,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Deposit LP tokens to MasterChef for BULL allocation.
-    function deposit(uint256 _pid, uint256 _amount, address _referrer) public nonReentrant {
+    function deposit(uint16 _pid, uint256 _amount, address _referrer) public nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
@@ -261,7 +254,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Withdraw LP tokens from MasterChef.
-    function withdraw(uint256 _pid, uint256 _amount) public nonReentrant {
+    function withdraw(uint16 _pid, uint256 _amount) public nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
@@ -280,7 +273,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Withdraw without caring about rewards. EMERGENCY ONLY.
-    function emergencyWithdraw(uint256 _pid) public nonReentrant {
+    function emergencyWithdraw(uint16 _pid) public nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         uint256 amount = user.amount;
@@ -306,7 +299,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Pay or lockup pending BULLs according to the harvestInterval of the pool and the nfts of the user.
-    function payOrLockupPendingBull(uint256 _pid) internal {
+    function payOrLockupPendingBull(uint16 _pid) internal {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
 
@@ -320,7 +313,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
         }
 
         if (user.nextHarvestUntil == 0) {
-            user.nextHarvestUntil = block.timestamp.add(harvestInterval);
+            user.nextHarvestUntil = uint64(block.timestamp.add(harvestInterval));
         }
 
         uint256 pending = user.strength.mul(pool.accBullPerShare).div(1e12).sub(user.rewardDebt);
@@ -331,7 +324,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
                 // reset lockup
                 totalLockedUpRewards = totalLockedUpRewards.sub(user.rewardLockedUp);
                 user.rewardLockedUp = 0;
-                user.nextHarvestUntil = block.timestamp.add(harvestInterval);
+                user.nextHarvestUntil = uint64(block.timestamp.add(harvestInterval));
 
                 // send rewards
                 safeBullTransfer(msg.sender, totalRewards);
@@ -349,11 +342,11 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
             totalLockedUpRewards = totalLockedUpRewards.add(pending);
             emit RewardLockedUp(msg.sender, _pid, pending);
         }
-        user.lastHarvest = block.timestamp;
+        user.lastHarvest = uint64(block.timestamp);
     }
 
     /// @dev Check if the _user has the conditions to win a nft.
-    function checkMintNFT(uint256 _pid, address _user) private {
+    function checkMintNFT(uint16 _pid, address _user) private {
         UserInfo storage user = userInfo[_pid][_user];
         if(bullNFT.canMint(bullFarmer) && bullNFT.getAuthorizedMiner(bullFarmer) == address(this)){
             if(block.timestamp.sub(user.lastHarvest) >= TWO_DAYS){
@@ -363,7 +356,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Deposit NFT to masterchef to get some boost in farming.
-    function depositNFT(uint256 _pid, uint256 _nftId) external {
+    function depositNFT(uint16 _pid, uint256 _nftId) external {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
 
@@ -386,7 +379,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Withdraw NFT from masterchef.
-    function withdrawNFT(uint256 _pid) public {
+    function withdrawNFT(uint16 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.nftId > 0, "user has no NFT");
@@ -404,7 +397,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Update the strength of the user. This is the portion from the pool of the user. 
-    function updateStrength(uint256 _pid) public {
+    function updateStrength(uint16 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
                 
@@ -435,7 +428,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Update the emission of bull per block.
-    function updateEmissionRate(uint256 _bullPerBlock) public onlyOwner {
+    function updateEmissionRate(uint128 _bullPerBlock) public onlyOwner {
         massUpdatePools();
         bullPerBlock = _bullPerBlock;
         emit EmissionRateUpdated(msg.sender, bullPerBlock, _bullPerBlock);
