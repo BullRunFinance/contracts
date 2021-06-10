@@ -139,12 +139,10 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Add a new lp to the pool. If _withRewards is true also add the same pool to rewardDistribution contract. Can only be called by the owner.
-    function add(uint32 _allocPoint, IBEP20 _lpToken, uint16 _depositFeeBP, uint32 _harvestInterval, bool _withUpdate, bool _withRewards) public onlyOwner nonDuplicated(_lpToken) {
+    function add(uint32 _allocPoint, IBEP20 _lpToken, uint16 _depositFeeBP, uint32 _harvestInterval, bool _withRewards) public onlyOwner nonDuplicated(_lpToken) {
         require(_depositFeeBP <= 1500, "add: deposit fee can't be more than 15%");
         require(_harvestInterval <= MAXIMUM_HARVEST_INTERVAL, "add: invalid harvest interval");
-        if (_withUpdate) {
-            massUpdatePools();
-        }
+        _massUpdatePools();
         uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
         totalAllocPoint = totalAllocPoint.add(_allocPoint);
         poolExistence[_lpToken] = true;
@@ -159,17 +157,15 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
         }));
         if(_withRewards){
             uint16 pid = uint16(poolInfo.length - 1);
-            rewardDistribution.add(_lpToken, true, pid);
+            rewardDistribution.add(_lpToken, pid);
         }   
     }
 
     /// @dev Update the given pool's BULL allocation point and deposit fee. Can only be called by the owner.
-    function set(uint256 _pid, uint32 _allocPoint, uint16 _depositFeeBP, uint32 _harvestInterval, bool _withUpdate) public onlyOwner {
+    function set(uint256 _pid, uint32 _allocPoint, uint16 _depositFeeBP, uint32 _harvestInterval) public onlyOwner {
         require(_depositFeeBP <= 10000, "set: invalid deposit fee basis points");
         require(_harvestInterval <= MAXIMUM_HARVEST_INTERVAL, "set: invalid harvest interval");
-        if (_withUpdate) {
-            massUpdatePools();
-        }
+        _massUpdatePools();
         totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
         poolInfo[_pid].allocPoint = _allocPoint;
         poolInfo[_pid].depositFeeBP = _depositFeeBP;
@@ -197,15 +193,15 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Update reward variables for all pools. Be careful of gas spending!
-    function massUpdatePools() public {
+    function _massUpdatePools() private {
         uint256 length = poolInfo.length;
         for (uint256 pid = 0; pid < length; ++pid) {
-            updatePool(pid);
+            _updatePool(pid);
         }
     }
 
     /// @dev Update reward variables of the given pool to be up-to-date.
-    function updatePool(uint256 _pid) public {
+    function _updatePool(uint256 _pid) private {
         PoolInfo storage pool = poolInfo[_pid];
         if (block.number <= pool.lastRewardBlock) {
             return;
@@ -226,7 +222,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     function deposit(uint16 _pid, uint256 _amount, address _referrer) public nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        updatePool(_pid);
+        _updatePool(_pid);
         if (_amount > 0 && address(bullReferral) != address(0) && _referrer != address(0) && _referrer != msg.sender) {
             bullReferral.recordReferral(msg.sender, _referrer);
         }
@@ -248,7 +244,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
                 }
             }
         }
-        updateStrength(_pid);
+        _updateStrength(_pid);
         user.rewardDebt = user.strength.mul(pool.accBullPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
     }
@@ -258,7 +254,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
-        updatePool(_pid);
+        _updatePool(_pid);
         payOrLockupPendingBull(_pid);
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
@@ -267,7 +263,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
                 rewardDistribution.reduceBalance(_pid, _amount, msg.sender);
             }
         }
-        updateStrength(_pid);
+        _updateStrength(_pid);
         user.rewardDebt = user.strength.mul(pool.accBullPerShare).div(1e12);
         emit Withdraw(msg.sender, _pid, _amount);
     }
@@ -360,7 +356,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
 
-        updatePool(_pid);
+        _updatePool(_pid);
         payOrLockupPendingBull(_pid);
 
         uint256 boostId = bullNFT.getBoost(_nftId);
@@ -372,7 +368,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
             bullNFT.safeTransferFrom(address(msg.sender), address(this), _nftId);
             user.nftId = _nftId;
         }
-        updateStrength(_pid);	
+        _updateStrength(_pid);	
     
         user.rewardDebt = user.strength.mul(pool.accBullPerShare).div(1e12);
         emit DepositNFT(msg.sender, _pid, _nftId);
@@ -384,20 +380,20 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.nftId > 0, "user has no NFT");
         
-        updatePool(_pid);
+        _updatePool(_pid);
         payOrLockupPendingBull(_pid);
         
         uint256 _nftId = user.nftId;
         bullNFT.transferFrom(address(this), address(msg.sender), user.nftId);
         user.nftId = 0;
-        updateStrength(_pid);
+        _updateStrength(_pid);
     
         user.rewardDebt = user.strength.mul(pool.accBullPerShare).div(1e12);
         emit WithdrawNFT(msg.sender, _pid, _nftId);
     }
 
     /// @dev Update the strength of the user. This is the portion from the pool of the user. 
-    function updateStrength(uint16 _pid) public {
+    function _updateStrength(uint16 _pid) private {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
                 
@@ -429,7 +425,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
 
     /// @dev Update the emission of bull per block.
     function updateEmissionRate(uint128 _bullPerBlock) public onlyOwner {
-        massUpdatePools();
+        _massUpdatePools();
         bullPerBlock = _bullPerBlock;
         emit EmissionRateUpdated(msg.sender, bullPerBlock, _bullPerBlock);
     }

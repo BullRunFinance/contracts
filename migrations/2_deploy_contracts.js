@@ -111,7 +111,7 @@ module.exports = async function (deployer, network, accounts) {
 
   /* Add pools */
 
-  await masterchef.add(1000, bullToken.address, 0, 3600, 0, 1, {from: owner})
-  await masterchef.add(1000, busdToken.address, 0, 0, 0, 0, {from: owner})
+  await masterchef.add(1000, bullToken.address, 0, 3600, 1, {from: owner})
+  await masterchef.add(1000, busdToken.address, 0, 0, 0, {from: owner})
 
 };

@@ -95,10 +95,8 @@ contract RewardDistribution is Ownable {
     }
 
     /// @dev Add a new lp to the pool. Can only be called by the owner.
-    function add(IBEP20 _lpToken, bool _withUpdate, uint16 _pid) public onlyOwnerOrMasterchef nonDuplicated(_pid) {
-        if (_withUpdate) {
-            massUpdatePools();
-        }
+    function add(IBEP20 _lpToken, uint16 _pid) public onlyOwnerOrMasterchef nonDuplicated(_pid) {
+        _massUpdatePools();
         uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
         totalAllocPoint = totalAllocPoint.add(100);
         poolExistence[_pid] = true;
@@ -137,7 +135,7 @@ contract RewardDistribution is Ownable {
     }
 
     /// @dev Update reward variables of the given pool to be up-to-date.
-    function updatePool(uint16 _pid) public {
+    function _updatePool(uint16 _pid) private {
         PoolInfo storage pool = poolInfo[_pid];
         if (block.number <= pool.lastRewardBlock) {
             return;
@@ -155,10 +153,10 @@ contract RewardDistribution is Ownable {
     }
 
     /// @dev Update reward variables for all pools. Be careful of gas spending!
-    function massUpdatePools() public {
+    function _massUpdatePools() private {
         uint256 length = poolPids.length;
         for (uint16 pid = 0; pid < length; pid++) {
-            updatePool(poolPids[pid]);
+            _updatePool(poolPids[pid]);
         }
     }
     
@@ -169,7 +167,7 @@ contract RewardDistribution is Ownable {
     }
 
     /// Increment balance into the contract to calculate and earn rewards
-    /// It assumes that there is no fee involved. It it's, the masterchef should send the amount after fees.
+    /// It assumes that there is no fee involved. It's, the masterchef should send the amount after fees.
     /// @param _amount The amount to increment the balance
     /// @param _pid Pool identifier
     function incrementBalance(uint16 _pid,uint256 _amount, address _user) public onlyMasterchef{
@@ -177,7 +175,7 @@ contract RewardDistribution is Ownable {
         require(_amount > 0, "IncrementBalance error: amount should be more than zero.");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
-        updatePool(_pid);
+        _updatePool(_pid);
         user.amount = user.amount.add(_amount);
         user.rewardDebt = user.amount.mul(pool.accRewardTokenPerShare).div(1e30);
         emit Deposit(_user, _pid, _amount);
@@ -190,7 +188,7 @@ contract RewardDistribution is Ownable {
         require(_amount > 0, "ReduceBalance error: amount should be more than zero.");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
-        updatePool(_pid);
+        _updatePool(_pid);
         if(user.amount < _amount){
             _amount = user.amount;
         }
@@ -208,7 +206,7 @@ contract RewardDistribution is Ownable {
     function harvest(uint16 _pid, address _user) public onlyMasterchef{
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
-        updatePool(_pid);
+        _updatePool(_pid);
         uint256 pending = user.amount.mul(pool.accRewardTokenPerShare).div(1e30).sub(user.rewardDebt);
         if(pending > 0) {
             uint256 currentRewardBalance = rewardBalance();
@@ -236,7 +234,7 @@ contract RewardDistribution is Ownable {
     /// @dev Deposit new reward to be distrivuted.
     function depositRewards(uint256 _newRewards) external onlyOwner{
         rewardToken.safeTransferFrom(msg.sender, address(this), _newRewards);
-        massUpdatePools();
+        _massUpdatePools();
         updateRewardPerBlock();
         emit DepositRewards(_newRewards);
     }
@@ -250,7 +248,7 @@ contract RewardDistribution is Ownable {
 
     /// @dev Update last block to distribute rewards.
     function updateEndBlockRewards(uint256 _endBlockReward) external onlyOwner{
-        massUpdatePools();
+        _massUpdatePools();
         endBlockRewards = _endBlockReward;
         updateRewardPerBlock();
     }

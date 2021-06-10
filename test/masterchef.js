@@ -93,13 +93,13 @@ contract("Masterchef", ([owner, investor, referrer]) => {
     })
 
     it("add pools", async() =>{
-      await masterchef.add(1000, bullToken.address, 0, 120, 0, 0, {from: owner})
+      await masterchef.add(1000, bullToken.address, 0, 120, 0, {from: owner})
       assert.equal(await masterchef.poolExistence(bullToken.address), true)
 
-      await masterchef.add(1000, busdToken.address, 0, 120, 0, 0, {from: owner})
+      await masterchef.add(1000, busdToken.address, 0, 120, 0, {from: owner})
       assert.equal(await masterchef.poolExistence(busdToken.address), true)
 
-      await masterchef.add(1000, testToken.address, 0, 120, 0, 1, {from: owner})
+      await masterchef.add(1000, testToken.address, 0, 120, 1, {from: owner})
       assert.equal(await masterchef.poolExistence(testToken.address), true)
       assert.equal((await rewardDistribution.poolInfo(2))[0], (await masterchef.poolInfo(2))[0])
 
@@ -227,7 +227,6 @@ contract("Masterchef", ([owner, investor, referrer]) => {
       let previousBullBalance
       let previousTestBalance
       let previousBUSDBalance
-      await rewardDistribution.massUpdatePools()
 //      console.log("Reward debt owner")
 //      console.log(toEth((await rewardDistribution.userInfo(2, owner))[1]))
 //      console.log("Reward debt investor")
@@ -295,7 +294,6 @@ contract("Masterchef", ([owner, investor, referrer]) => {
       let previousBalanceHolded
       let previousBullBalance
 
-      await rewardDistribution.massUpdatePools()
 //      console.log("Actual pending reward")
 //      console.log(toEth(await rewardDistribution.pendingReward(2, owner)))
 //      console.log("Balance assigned")
