@@ -355,9 +355,7 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
     function depositNFT(uint16 _pid, uint256 _nftId) external {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-
-        _updatePool(_pid);
-        payOrLockupPendingBull(_pid);
+        require(user.nftId == 0, "user already has a NFT");
 
         uint256 boostId = bullNFT.getBoost(_nftId);
         if (user.nftId == 0 &&
@@ -367,7 +365,12 @@ contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
              ){
             bullNFT.safeTransferFrom(address(msg.sender), address(this), _nftId);
             user.nftId = _nftId;
+        }else {
+            revert("Invalid NFT");
         }
+
+        _updatePool(_pid);
+        payOrLockupPendingBull(_pid);
         _updateStrength(_pid);	
     
         user.rewardDebt = user.strength.mul(pool.accBullPerShare).div(1e12);
