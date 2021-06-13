@@ -6,13 +6,28 @@
       "bridge_allowed_chains": [80001]
     },
     "bsc_mainnet":{
-        "bridge_allowed_chains": [137]
+        "bridge_allowed_chains": [137],
+        "masterchef_start_block": 0,
+        "rewards_start_block": 0,
+        "reward_token_address": ""
     },
     "polygon_testnet":{
         "bridge_allowed_chains": [97]
     },
     "polygon_mainnet":{
-        "bridge_allowed_chains": [56]
+        "bridge_allowed_chains": [56],
+        "masterchef_start_block": 0,
+        "rewards_start_block": 0,
+        "reward_token_address": ""
+    },
+    "fantom_testnet":{
+        "bridge_allowed_chains": [97]
+    },
+    "fantom_mainnet":{
+        "bridge_allowed_chains": [56],
+        "masterchef_start_block": 0,
+        "rewards_start_block": 0,
+        "reward_token_address": ""
     },
     "accounts": {
         "owner": "0x4363d1ECdb8818C698981f65A7053AeDF576B1dC",
