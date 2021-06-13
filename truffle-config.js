@@ -54,6 +54,34 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true
     },
+    polygon_testnet: {
+      provider: () => new HDWalletProvider(mnemonic, `https://rpc-mumbai.matic.today`),
+      network_id: 80001,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    polygon_mainnet: {
+      provider: () => new HDWalletProvider(mnemonic, `https://rpc-mainnet.matic.network`),
+      network_id: 137,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    fantom_mainnet: {
+      provider: () => new HDWalletProvider(mnemonic, `https://rpcapi.fantom.network`),
+      network_id: 250,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    fantom_testnet: {
+      provider: () => new HDWalletProvider(mnemonic, `https://rpc.testnet.fantom.network`),
+      network_id: 0xfa2,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
   },
 
   // Set default mocha options here, use special reporters etc.

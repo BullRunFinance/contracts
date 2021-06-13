@@ -1,0 +1,22 @@
+{
+    "develop": {
+        "chain_id": "*",
+        "rpcURL": "http://127.0.0.1:9545"
+    },
+    "bsc_testnet": {
+      "chain_id": "97",
+      "rpcURL": "https://data-seed-prebsc-1-s1.binance.org:8545"
+    },
+    "bsc_mainnet":{
+        "chain_id": "56",
+        "rpcURL": "https://bsc-dataseed1.binance.org"
+    },
+    "polygon_testnet":{
+        "chain_id": "80001",
+        "rpcURL": "https://rpc-mumbai.matic.today"
+    },
+    "polygon_mainnet":{
+        "chain_id": "137",
+        "rpcURL": "https://rpc-mainnet.matic.network"
+    }
+}

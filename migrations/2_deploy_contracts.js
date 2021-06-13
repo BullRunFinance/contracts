@@ -1,14 +1,16 @@
+const networkSettings = require('./networkSettings.json')
 const Web3 = require('web3')
-const rpcURL = "https://data-seed-prebsc-1-s1.binance.org:8545"
-const web3 = new Web3(rpcURL)
+let web3
+
+const deploySettings = require('./deploySettings.json')
 
 const BullToken = artifacts.require("BullToken");
 const BUSDToken = artifacts.require("BUSDToken");
-const TestToken = artifacts.require("TestToken");
 const Masterchef = artifacts.require("Masterchef");
 const RewardDistribution = artifacts.require("RewardDistribution");
 const BullReferral = artifacts.require("BullReferral");
 const BullNFT = artifacts.require("BullNFT");
+const BullBridge = artifacts.require("BullBridge");
 
 function toWei(n){
   n = n.toString()
@@ -21,18 +23,16 @@ function toEth(n){
 }
 
 module.exports = async function (deployer, network, accounts) {
-  let owner
-  let operator
-  let tester
-  
+  let { rpcURL } = networkSettings[network]
+  web3 = new Web3(rpcURL)
+
+  let { bridge_allowed_chains } = deploySettings[network]
+
+  let owner, operator, tester
   if(network == "develop"){
-    owner = accounts[0]
-    operator = accounts[1]
-    tester = accounts[2]
+    [owner, operator, tester] = accounts
   }else{
-    owner = "0x4363d1ECdb8818C698981f65A7053AeDF576B1dC"
-    operator = "0x27e74B3c51e68dD4C5E456fedC1ae4A0b90D02ec"
-    tester = "0x3a640273A4a62F7C2C9B903916D15D22FE77d356"
+    ({ owner, operator, tester } = deploySettings["accounts"])
   }
 
   const INT_MAX = "115792089237316195423570985008687907853269984665640564039457584007913129639935"
@@ -51,13 +51,18 @@ module.exports = async function (deployer, network, accounts) {
 
   await deployer.deploy(BUSDToken, {from: owner});
   const busdToken = await BUSDToken.deployed();
-/*
-  await deployer.deploy(TestToken);
-*/
+
   await deployer.deploy(BullNFT, {from: owner});
   const bullNFT = await BullNFT.deployed();
 
-  const blockNumber = await web3.eth.getBlockNumber();
+  let blockNumber = await web3.eth.getBlockNumber();
+
+  if(!network.includes("mainnet")){
+
+  }else{
+
+  }
+  
   await deployer.deploy(Masterchef, bullToken.address, bullNFT.address, owner, (20*10**18).toString(), blockNumber, {from: owner});
   const masterchef = await Masterchef.deployed();
 
@@ -114,4 +119,14 @@ module.exports = async function (deployer, network, accounts) {
   await masterchef.add(1000, bullToken.address, 0, 3600, 1, {from: owner})
   await masterchef.add(1000, busdToken.address, 0, 0, 0, {from: owner})
 
+  /* Deploy and set bridge */
+
+  await deployer.deploy(BullBridge, {from: owner});
+  const bullBridge = await BullBridge.deployed();
+
+  await bullBridge.addToken(0, bullToken.address, (10**18).toString(), bridge_allowed_chains, {from: owner})
+  await bullBridge.updateOperator(operator, {from: owner})
+  await bullToken.setExcludedFromAntiWhale(bullBridge.address, true, {from: owner})
+  await bullToken.setExcludedFromTax(bullBridge.address, true, {from: owner})
+  await bullToken.transfer(bullBridge.address, toWei(100000), {from: owner})
 };
