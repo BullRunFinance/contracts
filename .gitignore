@@ -2,3 +2,4 @@ build/contracts
 node_modules
 .secret
 contracts/BullMarketplace.sol
+addresses*deployed/
