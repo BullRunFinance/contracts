@@ -1,9 +1,3 @@
-const networkSettings = require('./networkSettings.json')
-const Web3 = require('web3')
-let web3
-
-const deploySettings = require('./deploySettings.json')
-
 const BullToken = artifacts.require("BullToken");
 const BUSDToken = artifacts.require("BUSDToken");
 const Masterchef = artifacts.require("Masterchef");
@@ -11,6 +5,14 @@ const RewardDistribution = artifacts.require("RewardDistribution");
 const BullReferral = artifacts.require("BullReferral");
 const BullNFT = artifacts.require("BullNFT");
 const BullBridge = artifacts.require("BullBridge");
+
+const networkSettings = require('./networkSettings.json')
+const Web3 = require('web3')
+let web3
+
+const deploySettings = require('./deploySettings.json')
+
+fs = require('fs');
 
 function toWei(n){
   n = n.toString()
@@ -20,6 +22,17 @@ function toWei(n){
 function toEth(n){
   n = n.toString()
   return parseFloat(web3.utils.fromWei(n, 'ether'))
+}
+
+let data = []
+
+function pushData(contract){
+  data.push(contract.constructor._json.contractName + " " + contract.address)
+}
+
+function saveAs(content, name) {
+  content = content.replace(/,/g, '\n');
+  fs.writeFileSync("addresses deployed/" + name + ".txt", content)
 }
 
 module.exports = async function (deployer, network, accounts) {
@@ -42,6 +55,8 @@ module.exports = async function (deployer, network, accounts) {
   if(testingDeploy){
     await deployer.deploy(BUSDToken, {from: owner});
     busdToken = await BUSDToken.deployed();
+    pushData(busdToken)
+
     reward_token_address = busdToken.address
 
     masterchef_start_block = await web3.eth.getBlockNumber();
@@ -52,21 +67,27 @@ module.exports = async function (deployer, network, accounts) {
 
   await deployer.deploy(BullToken, {from: owner});
   const bullToken = await BullToken.deployed();
-  
+  pushData(bullToken)
+
   await deployer.deploy(BullNFT, {from: owner});
   const bullNFT = await BullNFT.deployed();
+  pushData(bullNFT)
   
   await deployer.deploy(Masterchef, bullToken.address, bullNFT.address, owner, (20*10**18).toString(), masterchef_start_block, {from: owner});
   const masterchef = await Masterchef.deployed();
+  pushData(masterchef)
 
   await deployer.deploy(RewardDistribution, reward_token_address, masterchef.address, rewards_start_block, {from: owner});
   const rewardDistribution = await RewardDistribution.deployed();
+  pushData(rewardDistribution)
 
   await deployer.deploy(BullReferral, {from: owner});
   const bullReferral = await BullReferral.deployed();
+  pushData(bullReferral)
 
   await deployer.deploy(BullBridge, {from: owner});
   const bullBridge = await BullBridge.deployed();
+  pushData(bullBridge)
 
   /* Create NFTs */
 
@@ -92,25 +113,17 @@ module.exports = async function (deployer, network, accounts) {
 
   await masterchef.setBullReferral(bullReferral.address, {from: owner})
 
-  await bullToken.transferOwnership(masterchef.address, {from: owner})
-
   await bullReferral.updateOperator(masterchef.address, true, {from: owner})
 
   await bullToken.setExcludedFromAntiWhale(bullBridge.address, true, {from: owner})
 
   await bullToken.setExcludedFromTax(bullBridge.address, true, {from: owner})
 
-  /* Config bridge */
-
-  await bullBridge.addToken(0, bullToken.address, (10**18).toString(), bridge_allowed_chains, {from: owner})
-  await bullBridge.updateOperator(operator, {from: owner})
-  await bullToken.transfer(bullBridge.address, toWei(100000), {from: owner})
-
   if(testingDeploy){
     // Mint NFTs
-    await bullNFT.updateMiner(bullFarmer, owner, {from: owner});
-
     let bullFarmer = 8;
+
+    await bullNFT.updateMiner(bullFarmer, owner, {from: owner});
     await bullNFT.mint(bullFarmer, owner, {from: owner});
     await bullNFT.mint(bullFarmer, tester, {from: owner});
 
@@ -129,4 +142,14 @@ module.exports = async function (deployer, network, accounts) {
     await masterchef.add(1000, bullToken.address, 0, 3600, 1, {from: owner})
     await masterchef.add(1000, reward_token_address, 0, 0, 0, {from: owner})
   }
+
+  await bullToken.transferOwnership(masterchef.address, {from: owner})
+
+  /* Config bridge */
+
+  await bullBridge.addToken(0, bullToken.address, (10**18).toString(), bridge_allowed_chains, {from: owner})
+  await bullBridge.updateOperator(operator, {from: owner})
+  await bullToken.transfer(bullBridge.address, toWei(100000), {from: owner})
+
+  saveAs(data.toString(), network + " main contracts")
 };

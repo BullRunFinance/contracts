@@ -37,11 +37,11 @@ contract BullToken is BEP20, BullGovernance {
     // Min amount to liquify. (default 500 BULLs)
     uint256 public minAmountToLiquify = 500 ether;
     // The swap router, modifiable
-    IUniswapV2Router02 public bullSwapRouter;
+    IUniswapV2Router02 public bullFinanceRouter;
     // LP Locker
     address lpLocker;
     // The trading pair
-    address public bullSwapPair;
+    address public bullFinancePair;
     // In swap and liquify
     bool private _inSwapAndLiquify;
     // The operator can only update the transfer tax rate
@@ -60,7 +60,7 @@ contract BullToken is BEP20, BullGovernance {
     event maxBalanceAmountRateUpdated(address indexed operator, uint256 previousRate, uint256 newRate);
     event SwapAndLiquifyEnabledUpdated(address indexed operator, bool enabled);
     event MinAmountToLiquifyUpdated(address indexed operator, uint256 previousAmount, uint256 newAmount);
-    event BullSwapRouterUpdated(address indexed operator, address indexed router, address indexed pair);
+    event BullFinanceRouterUpdated(address indexed operator, address indexed router, address indexed pair);
     event SwapAndLiquify(uint256 tokensSwapped, uint256 ethReceived, uint256 tokensIntoLiqudity);
 
     modifier onlyOperator() {
@@ -92,7 +92,7 @@ contract BullToken is BEP20, BullGovernance {
         transferTaxRate = _transferTaxRate;
     }
 
-    constructor() public BEP20("BullSwap Token", "BULL") BullGovernance(address(this)) {
+    constructor() public BEP20("BullFinance Token", "BULL") BullGovernance(address(this)) {
         _operator = _msgSender();
         lpLocker = _msgSender();
         emit OperatorTransferred(address(0), _operator);
@@ -116,9 +116,9 @@ contract BullToken is BEP20, BullGovernance {
         if (
             swapAndLiquifyEnabled == true
             && _inSwapAndLiquify == false
-            && address(bullSwapRouter) != address(0)
-            && bullSwapPair != address(0)
-            && sender != bullSwapPair
+            && address(bullFinanceRouter) != address(0)
+            && bullFinancePair != address(0)
+            && sender != bullFinancePair
             && sender != owner()
         ) {
             swapAndLiquify();
@@ -192,15 +192,15 @@ contract BullToken is BEP20, BullGovernance {
 
     /// @dev Swap tokens for eth
     function swapTokensForEth(uint256 tokenAmount) private {
-        // generate the bullSwap pair path of token -> weth
+        // generate the bullFinance pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = address(this);
-        path[1] = bullSwapRouter.WETH();
+        path[1] = bullFinanceRouter.WETH();
 
-        _approve(address(this), address(bullSwapRouter), tokenAmount);
+        _approve(address(this), address(bullFinanceRouter), tokenAmount);
 
         // make the swap
-        bullSwapRouter.swapExactTokensForETHSupportingFeeOnTransferTokens(
+        bullFinanceRouter.swapExactTokensForETHSupportingFeeOnTransferTokens(
             tokenAmount,
             0, // accept any amount of ETH
             path,
@@ -212,10 +212,10 @@ contract BullToken is BEP20, BullGovernance {
     /// @dev Add liquidity
     function addLiquidity(uint256 tokenAmount, uint256 ethAmount) private {
         // approve token transfer to cover all possible scenarios
-        _approve(address(this), address(bullSwapRouter), tokenAmount);
+        _approve(address(this), address(bullFinanceRouter), tokenAmount);
 
         // add the liquidity
-        bullSwapRouter.addLiquidityETH{value: ethAmount}(
+        bullFinanceRouter.addLiquidityETH{value: ethAmount}(
             address(this),
             tokenAmount,
             0, // slippage is unavoidable
@@ -246,7 +246,7 @@ contract BullToken is BEP20, BullGovernance {
         return _excludedFromTax[_account];
     }
 
-    // To receive BNB from bullSwapRouter when swapping
+    // To receive BNB from bullFinanceRouter when swapping
     receive() external payable {}
 
     /**
@@ -317,11 +317,11 @@ contract BullToken is BEP20, BullGovernance {
      * @dev Update the swap router.
      * Can only be called by the current operator.
      */
-    function updateBullSwapRouter(address _router) public onlyOperator {
-        bullSwapRouter = IUniswapV2Router02(_router);
-        bullSwapPair = IUniswapV2Factory(bullSwapRouter.factory()).getPair(address(this), bullSwapRouter.WETH());
-        require(bullSwapPair != address(0), "BULL::updateBullSwapRouter: Invalid pair address.");
-        emit BullSwapRouterUpdated(msg.sender, address(bullSwapRouter), bullSwapPair);
+    function updateBullFinanceRouter(address _router) public onlyOperator {
+        bullFinanceRouter = IUniswapV2Router02(_router);
+        bullFinancePair = IUniswapV2Factory(bullFinanceRouter.factory()).getPair(address(this), bullFinanceRouter.WETH());
+        require(bullFinancePair != address(0), "BULL::updateBullFinanceRouter: Invalid pair address.");
+        emit BullFinanceRouterUpdated(msg.sender, address(bullFinanceRouter), bullFinancePair);
     }
 
     /**
