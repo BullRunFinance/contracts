@@ -32,7 +32,7 @@ function pushData(contract){
 
 function saveAs(content, name) {
   content = content.replace(/,/g, '\n');
-  fs.writeFileSync("addresses deployed/" + name + ".txt", content)
+  fs.writeFileSync("../deploys/" + name + ".txt", content)
 }
 
 module.exports = async function (deployer, network, accounts) {
