@@ -10,14 +10,14 @@ import "./RewardDistribution.sol";
 import "./interfaces/IBullReferral.sol";
 import "./interfaces/IBullNFT.sol";
 
-// MasterChef is the master of Bull. He can make Bull and he is a fair guy.
+// Masterchef is the master of Bull. He can make Bull and he is a fair guy.
 //
 // Note that it's ownable and the owner wields tremendous power. The ownership
 // will be transferred to a governance smart contract once BULL is sufficiently
 // distributed and the community can show to govern itself.
 //
 // Have fun reading it. Hopefully it's bug-free. God bless.
-contract MasterChef is ERC721Holder, Ownable, ReentrancyGuard {
+contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeBEP20 for IBEP20;
 
