@@ -139,7 +139,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Add a new lp to the pool. If _withRewards is true also add the same pool to rewardDistribution contract. Can only be called by the owner.
-    function add(uint32 _allocPoint, IBEP20 _lpToken, uint16 _depositFeeBP, uint32 _harvestInterval, bool _withRewards) public onlyOwner nonDuplicated(_lpToken) {
+    function add(uint32 _allocPoint, IBEP20 _lpToken, uint16 _depositFeeBP, uint32 _harvestInterval, bool _withRewards) external onlyOwner nonDuplicated(_lpToken) {
         require(_depositFeeBP <= 1500, "add: deposit fee can't be more than 15%");
         require(_harvestInterval <= MAXIMUM_HARVEST_INTERVAL, "add: invalid harvest interval");
         _massUpdatePools();
@@ -162,7 +162,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Update the given pool's BULL allocation point and deposit fee. Can only be called by the owner.
-    function set(uint256 _pid, uint32 _allocPoint, uint16 _depositFeeBP, uint32 _harvestInterval) public onlyOwner {
+    function set(uint256 _pid, uint32 _allocPoint, uint16 _depositFeeBP, uint32 _harvestInterval) external onlyOwner {
         require(_depositFeeBP <= 10000, "set: invalid deposit fee basis points");
         require(_harvestInterval <= MAXIMUM_HARVEST_INTERVAL, "set: invalid harvest interval");
         _massUpdatePools();
@@ -219,7 +219,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Deposit LP tokens to MasterChef for BULL allocation.
-    function deposit(uint16 _pid, uint256 _amount, address _referrer) public nonReentrant {
+    function deposit(uint16 _pid, uint256 _amount, address _referrer) external nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         _updatePool(_pid);
@@ -250,7 +250,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Withdraw LP tokens from MasterChef.
-    function withdraw(uint16 _pid, uint256 _amount) public nonReentrant {
+    function withdraw(uint16 _pid, uint256 _amount) external nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
@@ -269,7 +269,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Withdraw without caring about rewards. EMERGENCY ONLY.
-    function emergencyWithdraw(uint16 _pid) public nonReentrant {
+    function emergencyWithdraw(uint16 _pid) external nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         uint256 amount = user.amount;
@@ -378,7 +378,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Withdraw NFT from masterchef.
-    function withdrawNFT(uint16 _pid) public {
+    function withdrawNFT(uint16 _pid) external {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.nftId > 0, "user has no NFT");
@@ -413,33 +413,33 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     /// @dev Update dev address by the previous dev.
-    function setDevAddress(address _devAddress) public {
+    function setDevAddress(address _devAddress) external {
         require(msg.sender == devAddress, "setDevAddress: FORBIDDEN");
         require(_devAddress != address(0), "setDevAddress: ZERO");
         devAddress = _devAddress;
     }
 
     /// @dev Update the fee address. 
-    function setFeeAddress(address _feeAddress) public {
+    function setFeeAddress(address _feeAddress) external {
         require(msg.sender == feeAddress, "setFeeAddress: FORBIDDEN");
         require(_feeAddress != address(0), "setFeeAddress: ZERO");
         feeAddress = _feeAddress;
     }
 
     /// @dev Update the emission of bull per block.
-    function updateEmissionRate(uint128 _bullPerBlock) public onlyOwner {
+    function updateEmissionRate(uint128 _bullPerBlock) external onlyOwner {
         _massUpdatePools();
         bullPerBlock = _bullPerBlock;
         emit EmissionRateUpdated(msg.sender, bullPerBlock, _bullPerBlock);
     }
 
     /// @dev Update the bull referral contract address by the owner
-    function setBullReferral(IBullReferral _bullReferral) public onlyOwner {
+    function setBullReferral(IBullReferral _bullReferral) external onlyOwner {
         bullReferral = _bullReferral;
     }
 
     /// @dev Update referral commission rate by the owner. Should be in basis points.
-    function setReferralCommissionRate(uint16 _referralCommissionRate) public onlyOwner {
+    function setReferralCommissionRate(uint16 _referralCommissionRate) external onlyOwner {
         require(_referralCommissionRate <= MAXIMUM_REFERRAL_COMMISSION_RATE, "setReferralCommissionRate: invalid referral commission rate basis points");
         referralCommissionRate = _referralCommissionRate;
     }
