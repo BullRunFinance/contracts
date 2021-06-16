@@ -144,11 +144,9 @@ contract BullToken is BEP20, BullGovernance {
             uint256 taxAmount = amount.mul(userTransferTaxRate).div(10000);
             uint256 burnAmount = taxAmount.mul(burnRate).div(100);
             uint256 liquidityAmount = taxAmount.sub(burnAmount);
-            require(taxAmount == burnAmount + liquidityAmount, "BULL::transfer: Burn value invalid");
 
             // default 95% of transfer sent to recipient
             uint256 sendAmount = amount.sub(taxAmount);
-            require(amount == sendAmount + taxAmount, "BULL::transfer: Tax value invalid");
 
             super._transfer(sender, BURN_ADDRESS, burnAmount);
             super._transfer(sender, address(this), liquidityAmount);
