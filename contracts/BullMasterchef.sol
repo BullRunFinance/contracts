@@ -230,7 +230,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
         if (_amount > 0) {
             pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
             if (address(pool.lpToken) == address(bull)) {
-                uint256 transferTax = _amount.mul(bull.transferTaxRate()).div(10000);
+                uint256 transferTax = _amount.mul(bull.getTransferTax(msg.sender, address(this))).div(10000);
                 _amount = _amount.sub(transferTax);
             }
             if (pool.depositFeeBP > 0) {

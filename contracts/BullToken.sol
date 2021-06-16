@@ -110,6 +110,21 @@ contract BullToken is BEP20, BullGovernance {
         _moveDelegates(address(0), _delegates[_to], _amount);
     }
 
+    function getTransferTax(address _sender, address _recipient) public view returns(uint256){
+        uint256 userTransferTaxRate = transferTaxRate;
+        // if the NFT contract are defined and the sender o receiver has some of this nfts, it has a discount in transfer tax
+        if(address(bullNFT) != address(0)){
+            if(bullNFT.hasBoost(_sender, goldenBull) || bullNFT.hasBoost(_recipient, goldenBull)){
+                userTransferTaxRate = userTransferTaxRate.sub(userTransferTaxRate.mul(bullNFT.getBonus(goldenBull)).div(10000));
+            }else if(bullNFT.hasBoost(_sender, silverBull) || bullNFT.hasBoost(_recipient, silverBull)){
+                userTransferTaxRate = userTransferTaxRate.sub(userTransferTaxRate.mul(bullNFT.getBonus(silverBull)).div(10000));
+            }else if(bullNFT.hasBoost(_sender, bronzeBull) || bullNFT.hasBoost(_recipient, bronzeBull)){
+                userTransferTaxRate = userTransferTaxRate.sub(userTransferTaxRate.mul(bullNFT.getBonus(bronzeBull)).div(10000));
+            }
+        }
+        return userTransferTaxRate;
+    }
+
     /// @dev overrides transfer function to meet tokenomics of BULL
     function _transfer(address sender, address recipient, uint256 amount) internal virtual override antiWhale(sender, recipient, amount) {
         // swap and liquify
@@ -127,19 +142,8 @@ contract BullToken is BEP20, BullGovernance {
         if (recipient == BURN_ADDRESS || transferTaxRate == 0 || _excludedFromTax[sender] || _excludedFromTax[recipient]) {
             super._transfer(sender, recipient, amount);
         } else {
-            uint256 userTransferTaxRate = transferTaxRate;
+            uint256 userTransferTaxRate = getTransferTax(sender, recipient);
 
-            // if the NFT contract are defined and the sender o receiver has some of this nfts, it has a discount in transfer tax
-            if(address(bullNFT) != address(0)){
-                if(bullNFT.hasBoost(sender, goldenBull) || bullNFT.hasBoost(recipient, goldenBull)){
-                    userTransferTaxRate = userTransferTaxRate.sub(userTransferTaxRate.mul(bullNFT.getBonus(goldenBull)).div(10000));
-                }else if(bullNFT.hasBoost(sender, silverBull) || bullNFT.hasBoost(recipient, silverBull)){
-                    userTransferTaxRate = userTransferTaxRate.sub(userTransferTaxRate.mul(bullNFT.getBonus(silverBull)).div(10000));
-                }else if(bullNFT.hasBoost(sender, bronzeBull) || bullNFT.hasBoost(recipient, bronzeBull)){
-                    userTransferTaxRate = userTransferTaxRate.sub(userTransferTaxRate.mul(bullNFT.getBonus(bronzeBull)).div(10000));
-                }
-            }
-            
             // default tax is 5% of every transfer
             uint256 taxAmount = amount.mul(userTransferTaxRate).div(10000);
             uint256 burnAmount = taxAmount.mul(burnRate).div(100);
