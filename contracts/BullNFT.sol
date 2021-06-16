@@ -31,6 +31,7 @@ contract BullNFT is ERC721Enumerable, Ownable, IBullNFT {
     mapping(uint256 => Type) public typesByBoostId; 
     uint256 private nextId = 1;
     uint256 public nextBoostId = 1;
+    bytes32 private _uri = _stringToBytes32("https://nfts.bullrun.finance/");
 
     modifier onlyMiner(uint256 _boostId){
         require(getAuthorizedMiner(_boostId) == msg.sender, "You are not the miner of this type of nft");
@@ -117,7 +118,7 @@ contract BullNFT is ERC721Enumerable, Ownable, IBullNFT {
         function to also supply the Token.Type information.
     */
     function _baseURI() internal view virtual override returns (string memory) {
-        return "http://nfts.bull.finance/";
+        return _bytes32ToString(_uri);
     }
     
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
@@ -127,6 +128,33 @@ contract BullNFT is ERC721Enumerable, Ownable, IBullNFT {
             baseURI, "/",
             tokenId.toString(), "/",
             tokenType.bonus.toString()));
+    }
+
+    function setUri(string memory newUri) external onlyOwner{
+        _uri = _stringToBytes32(newUri);
+    }
+
+    function _stringToBytes32(string memory _source) internal pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(_source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+    
+        assembly {
+            result := mload(add(_source, 32))
+        }
+    }
+    
+    function _bytes32ToString(bytes32 _bytes32) internal pure returns (string memory) {
+        uint8 i = 0;
+        while(i < 32 && _bytes32[i] != 0) {
+            i++;
+        }
+        bytes memory bytesArray = new bytes(i);
+        for (i = 0; i < 32 && _bytes32[i] != 0; i++) {
+            bytesArray[i] = _bytes32[i];
+        }
+        return string(bytesArray);
     }
 }
 
