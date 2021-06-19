@@ -18,5 +18,13 @@
     "polygon_mainnet":{
         "chain_id": "137",
         "rpcURL": "https://rpc-mainnet.matic.network"
+    },
+    "fantom_testnet":{
+        "chain_id": "4002",
+        "rpcURL": "https://rpc.testnet.fantom.network"
+    },
+    "fantom_mainnet":{
+        "chain_id": "250",
+        "rpcURL": "https://rpcapi.fantom.network"
     }
 }

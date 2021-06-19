@@ -20,8 +20,8 @@
 
  const HDWalletProvider = require('@truffle/hdwallet-provider');
  const fs = require('fs');
- const mnemonic = fs.readFileSync(".secret").toString().trim();
 
+ const { mnemonic, bscscanApiKey, etherscanKey, infuraKey } = require('./.secrets.json');
 
 module.exports = {
   /**
@@ -45,17 +45,19 @@ module.exports = {
       network_id: 97,
       confirmations: 10,
       timeoutBlocks: 200,
-      skipDryRun: true
+      skipDryRun: true,
+      apiKey: bscscanApiKey
     },
     bsc_mainnet: {
       provider: () => new HDWalletProvider(mnemonic, `https://bsc-dataseed1.binance.org`),
       network_id: 56,
       confirmations: 10,
       timeoutBlocks: 200,
-      skipDryRun: true
+      skipDryRun: true,
+      apiKey: bscscanApiKey
     },
     polygon_testnet: {
-      provider: () => new HDWalletProvider(mnemonic, `https://rpc-mumbai.matic.today`),
+      provider: () => new HDWalletProvider(mnemonic, `https://polygon-mumbai.infura.io/v3/` + infuraKey),
       network_id: 80001,
       confirmations: 2,
       timeoutBlocks: 200,
@@ -78,7 +80,7 @@ module.exports = {
     fantom_testnet: {
       provider: () => new HDWalletProvider(mnemonic, `https://rpc.testnet.fantom.network`),
       network_id: 0xfa2,
-      confirmations: 10,
+      confirmations: 1,
       timeoutBlocks: 200,
       skipDryRun: true
     },

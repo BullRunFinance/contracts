@@ -5,6 +5,7 @@ const RewardDistribution = artifacts.require("RewardDistribution");
 const BullReferral = artifacts.require("BullReferral");
 const BullNFT = artifacts.require("BullNFT");
 const BullBridge = artifacts.require("BullBridge");
+const BullMarketplace = artifacts.require("BullMarketplace");
 
 const networkSettings = require('./networkSettings.json')
 const Web3 = require('web3')
@@ -42,11 +43,11 @@ module.exports = async function (deployer, network, accounts) {
 
   let { bridge_allowed_chains, masterchef_start_block, rewards_start_block, reward_token_address } = deploySettings[network]
 
-  let owner, operator, tester
+  let owner, operator, testerA, testerN, testerN2, testerE
   if(network == "develop"){
-    [owner, operator, tester] = accounts
+    [owner, operator, testerA, testerN, testerN2, testerE] = accounts
   }else{
-    ({ owner, operator, tester } = deploySettings["accounts"])
+    ({ owner, operator, testerA, testerN, testerN2, testerE } = deploySettings["accounts"])
   }
   
   let testingDeploy = !network.includes("mainnet") ? true : false
@@ -89,16 +90,20 @@ module.exports = async function (deployer, network, accounts) {
   const bullBridge = await BullBridge.deployed();
   pushData(bullBridge)
 
+  await deployer.deploy(BullMarketplace, bullToken.address, owner, {from: owner});
+  const bullMarketplace = await BullMarketplace.deployed();
+  pushData(bullMarketplace)
+
   /* Create NFTs */
 
   await bullNFT.createBoost(owner, 10, 5000, {from: owner}); // goldeBull
   await bullNFT.createBoost(owner, 10, 2500, {from: owner}); // silverBull
   await bullNFT.createBoost(owner, 10, 1000, {from: owner}); // bronzeBull
   await bullNFT.createBoost(owner, 10, 14400, {from: owner}); // thePersistentBull
-  await bullNFT.createBoost(owner, 10, 1000, {from: owner}); // bullseye
-  await bullNFT.createBoost(owner, 10, 1000, {from: owner}); // missedBull
+  await bullNFT.createBoost(owner, 10, 4000, {from: owner}); // bullseye
+  await bullNFT.createBoost(owner, 10, 2000, {from: owner}); // bullTrader
   await bullNFT.createBoost(owner, 10, 0, {from: owner}); // goldebBullLotteryTicket
-  await bullNFT.createBoost(masterchef.address, 10, 2000, {from: owner}); // bullFarmer
+  await bullNFT.createBoost(masterchef.address, 10, 3000, {from: owner}); // bullFarmer
   await bullNFT.createBoost(bullBridge.address, 10, 10000, {from: owner}); // theBigBull
 
   /* Config contracts */
@@ -121,17 +126,39 @@ module.exports = async function (deployer, network, accounts) {
 
   if(testingDeploy){
     // Mint NFTs
+    let bullseye = 5;
+    let bullTrader = 6;
     let bullFarmer = 8;
 
+    await bullNFT.updateMiner(bullseye, owner, {from: owner});
+    await bullNFT.updateMiner(bullTrader, owner, {from: owner});
     await bullNFT.updateMiner(bullFarmer, owner, {from: owner});
-    await bullNFT.mint(bullFarmer, owner, {from: owner});
-    await bullNFT.mint(bullFarmer, tester, {from: owner});
 
+    await bullNFT.mint(bullFarmer, owner, {from: owner});
+    await bullNFT.mint(bullseye, testerA, {from: owner});
+    await bullNFT.mint(bullTrader, testerA, {from: owner});
+    await bullNFT.mint(bullFarmer, testerA, {from: owner});
+    
+    await bullNFT.mint(bullseye, testerN, {from: owner});
+    await bullNFT.mint(bullTrader, testerN, {from: owner});
+    await bullNFT.mint(bullFarmer, testerN, {from: owner});
+    
+    await bullNFT.mint(bullseye, testerN2, {from: owner});
+    await bullNFT.mint(bullTrader, testerN2, {from: owner});
+    await bullNFT.mint(bullFarmer, testerN2, {from: owner});
+    
+    await bullNFT.mint(bullseye, testerE, {from: owner});
+    await bullNFT.mint(bullTrader, testerE, {from: owner});
+    await bullNFT.mint(bullFarmer, testerE, {from: owner});
+    
     await bullNFT.updateMiner(bullFarmer, masterchef.address, {from: owner});
 
     // Mint bull
     await bullToken.mint(owner, toWei('5000000'), {from: owner})
-    await bullToken.mint(tester, toWei('10000'), {from: owner})
+    await bullToken.mint(testerA, toWei('10000'), {from: owner})
+    await bullToken.mint(testerN, toWei('10000'), {from: owner})
+    await bullToken.mint(testerN2, toWei('10000'), {from: owner})
+    await bullToken.mint(testerE, toWei('10000'), {from: owner})
     await busdToken.mint(owner, toWei('1000000'), {from: owner})
 
     // Deposit rewards

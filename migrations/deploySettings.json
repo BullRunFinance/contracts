@@ -3,7 +3,7 @@
         "bridge_allowed_chains": []
     },
     "bsc_testnet": {
-      "bridge_allowed_chains": [80001],
+      "bridge_allowed_chains": [80001, 4002],
       "router": "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
       "weth": "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"
     },
@@ -14,7 +14,7 @@
         "reward_token_address": ""
     },
     "polygon_testnet":{
-        "bridge_allowed_chains": [97]
+        "bridge_allowed_chains": [97, 4002]
     },
     "polygon_mainnet":{
         "bridge_allowed_chains": [56],
@@ -23,7 +23,7 @@
         "reward_token_address": ""
     },
     "fantom_testnet":{
-        "bridge_allowed_chains": [97]
+        "bridge_allowed_chains": [97, 80001]
     },
     "fantom_mainnet":{
         "bridge_allowed_chains": [56],
@@ -32,8 +32,11 @@
         "reward_token_address": ""
     },
     "accounts": {
-        "owner": "0x4363d1ECdb8818C698981f65A7053AeDF576B1dC",
+        "owner": "0x40e0B0196CC7a56D1558A38067f0171DDf05c55e",
         "operator": "0x27e74B3c51e68dD4C5E456fedC1ae4A0b90D02ec",
-        "tester": "0x3a640273A4a62F7C2C9B903916D15D22FE77d356" 
+        "testerA": "0xDdaF8921e82d3f7EC6F6FF2A29a88a862422037b",
+        "testerN": "0x16C4FED28eCf239ec0D1C502B931B4c9b13B8604",
+        "testerN2": "0xd14AE45fdcFd31898FD7a4204D974522ac36eD41",
+        "testerE": "0xb82fE8181A2Aa63714fE57718f6A164Ec97c10Ca"
     }
 }
