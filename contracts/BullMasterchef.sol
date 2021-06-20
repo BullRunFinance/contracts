@@ -109,12 +109,14 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     constructor(
         BullToken _bull,
         IBullNFT _bullNFT,
+        IBullReferral _bullReferral,
         address _feeAddress,
         uint128 _bullPerBlock,
         uint256 _startBlock
     ) public {
         bull = _bull;
         bullNFT = _bullNFT;
+        bullReferral = _bullReferral;
         devAddress = msg.sender;
         feeAddress = _feeAddress;
         bullPerBlock = _bullPerBlock;
@@ -223,7 +225,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         _updatePool(_pid);
-        if (_amount > 0 && address(bullReferral) != address(0) && _referrer != address(0) && _referrer != msg.sender) {
+        if (_amount > 0 && _referrer != address(0) && _referrer != msg.sender) {
             bullReferral.recordReferral(msg.sender, _referrer);
         }
         payOrLockupPendingBull(_pid);
@@ -447,7 +449,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
 
     /// @dev Pay referral commission to the referrer who referred this user.
     function payReferralCommission(address _user, uint256 _pending) internal {
-        if (address(bullReferral) != address(0) && referralCommissionRate > 0) {
+        if (referralCommissionRate > 0) {
             address referrer = bullReferral.getReferrer(_user);
             uint256 commissionAmount = _pending.mul(referralCommissionRate).div(10000);
 

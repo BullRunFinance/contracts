@@ -75,17 +75,17 @@ module.exports = async function (deployer, network, accounts) {
   const bullNFT = await BullNFT.deployed();
   pushData(bullNFT)
   
-  await deployer.deploy(Masterchef, bullToken.address, bullNFT.address, owner, (20*10**18).toString(), masterchef_start_block);
+  await deployer.deploy(BullReferral);
+  const bullReferral = await BullReferral.deployed();
+  pushData(bullReferral)
+
+  await deployer.deploy(Masterchef, bullToken.address, bullNFT.address, bullReferral.address, owner, (20*10**18).toString(), masterchef_start_block);
   const masterchef = await Masterchef.deployed();
   pushData(masterchef)
 
   await deployer.deploy(RewardDistribution, reward_token_address, masterchef.address, rewards_start_block);
   const rewardDistribution = await RewardDistribution.deployed();
   pushData(rewardDistribution)
-
-  await deployer.deploy(BullReferral);
-  const bullReferral = await BullReferral.deployed();
-  pushData(bullReferral)
 
   await deployer.deploy(BullBridge, bullNFT.address);
   const bullBridge = await BullBridge.deployed();
@@ -118,8 +118,6 @@ module.exports = async function (deployer, network, accounts) {
   await bullToken.setExcludedFromAntiWhale(masterchef.address, true)
 
   await masterchef.setRewardDistribution(rewardDistribution.address)
-
-  await masterchef.setBullReferral(bullReferral.address)
 
   await bullReferral.updateOperator(masterchef.address, true)
 
