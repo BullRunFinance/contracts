@@ -43,18 +43,19 @@ module.exports = async function (deployer, network, accounts) {
 
   let { bridge_allowed_chains, masterchef_start_block, rewards_start_block, reward_token_address } = deploySettings[network]
 
-  let owner, operator, testerA, testerN, testerN2, testerE
+  let owner = accounts[0]
+  let operator, testerA, testerN, testerN2, testerE
   if(network == "develop"){
-    [owner, operator, testerA, testerN, testerN2, testerE] = accounts
+    [operator, testerA, testerN, testerN2, testerE] = accounts
   }else{
-    ({ owner, operator, testerA, testerN, testerN2, testerE } = deploySettings["accounts"])
+    ({ operator, testerA, testerN, testerN2, testerE } = deploySettings["accounts"])
   }
   
   let testingDeploy = !network.includes("mainnet") ? true : false
 
   let busdToken
   if(testingDeploy){
-    await deployer.deploy(BUSDToken, {from: owner});
+    await deployer.deploy(BUSDToken);
     busdToken = await BUSDToken.deployed();
     pushData(busdToken)
 
@@ -66,63 +67,63 @@ module.exports = async function (deployer, network, accounts) {
 
   /* Deploy contracts */
 
-  await deployer.deploy(BullToken, {from: owner});
+  await deployer.deploy(BullToken);
   const bullToken = await BullToken.deployed();
   pushData(bullToken)
 
-  await deployer.deploy(BullNFT, {from: owner});
+  await deployer.deploy(BullNFT);
   const bullNFT = await BullNFT.deployed();
   pushData(bullNFT)
   
-  await deployer.deploy(Masterchef, bullToken.address, bullNFT.address, owner, (20*10**18).toString(), masterchef_start_block, {from: owner});
+  await deployer.deploy(Masterchef, bullToken.address, bullNFT.address, owner, (20*10**18).toString(), masterchef_start_block);
   const masterchef = await Masterchef.deployed();
   pushData(masterchef)
 
-  await deployer.deploy(RewardDistribution, reward_token_address, masterchef.address, rewards_start_block, {from: owner});
+  await deployer.deploy(RewardDistribution, reward_token_address, masterchef.address, rewards_start_block);
   const rewardDistribution = await RewardDistribution.deployed();
   pushData(rewardDistribution)
 
-  await deployer.deploy(BullReferral, {from: owner});
+  await deployer.deploy(BullReferral);
   const bullReferral = await BullReferral.deployed();
   pushData(bullReferral)
 
-  await deployer.deploy(BullBridge, {from: owner});
+  await deployer.deploy(BullBridge);
   const bullBridge = await BullBridge.deployed();
   pushData(bullBridge)
 
-  await deployer.deploy(BullMarketplace, bullToken.address, owner, {from: owner});
+  await deployer.deploy(BullMarketplace, bullToken.address, owner);
   const bullMarketplace = await BullMarketplace.deployed();
   pushData(bullMarketplace)
 
   /* Create NFTs */
 
-  await bullNFT.createBoost(owner, 10, 5000, {from: owner}); // goldeBull
-  await bullNFT.createBoost(owner, 10, 2500, {from: owner}); // silverBull
-  await bullNFT.createBoost(owner, 10, 1000, {from: owner}); // bronzeBull
-  await bullNFT.createBoost(owner, 10, 14400, {from: owner}); // thePersistentBull
-  await bullNFT.createBoost(owner, 10, 4000, {from: owner}); // bullseye
-  await bullNFT.createBoost(owner, 10, 2000, {from: owner}); // bullTrader
-  await bullNFT.createBoost(owner, 10, 0, {from: owner}); // goldebBullLotteryTicket
-  await bullNFT.createBoost(masterchef.address, 10, 3000, {from: owner}); // bullFarmer
-  await bullNFT.createBoost(bullBridge.address, 10, 10000, {from: owner}); // theBigBull
+  await bullNFT.createBoost(owner, 10, 5000); // 1 - goldeBull
+  await bullNFT.createBoost(owner, 10, 2500); // 2 - silverBull
+  await bullNFT.createBoost(owner, 10, 1000); // 3 - bronzeBull
+  await bullNFT.createBoost(owner, 10, 14400); // 4 - thePersistentBull
+  await bullNFT.createBoost(owner, 10, 4000); // 5 - bullseye
+  await bullNFT.createBoost(owner, 10, 2000); // 6 - bullTrader
+  await bullNFT.createBoost(owner, 10, 0); // 7 - goldebBullLotteryTicket
+  await bullNFT.createBoost(masterchef.address, 10, 3000); // 8 -  bullFarmer
+  await bullNFT.createBoost(bullBridge.address, 10, 10000); // 9 - theBigBull
 
   /* Config contracts */
 
-  await bullToken.setExcludedFromAntiWhale(owner, true, {from: owner})
+  await bullToken.setExcludedFromAntiWhale(owner, true)
 
-  await bullToken.setExcludedFromTax(owner, true, {from: owner})
+  await bullToken.setExcludedFromTax(owner, true)
 
-  await bullToken.setExcludedFromAntiWhale(masterchef.address, true, {from: owner})
+  await bullToken.setExcludedFromAntiWhale(masterchef.address, true)
 
-  await masterchef.setRewardDistribution(rewardDistribution.address, {from: owner})
+  await masterchef.setRewardDistribution(rewardDistribution.address)
 
-  await masterchef.setBullReferral(bullReferral.address, {from: owner})
+  await masterchef.setBullReferral(bullReferral.address)
 
-  await bullReferral.updateOperator(masterchef.address, true, {from: owner})
+  await bullReferral.updateOperator(masterchef.address, true)
 
-  await bullToken.setExcludedFromAntiWhale(bullBridge.address, true, {from: owner})
+  await bullToken.setExcludedFromAntiWhale(bullBridge.address, true)
 
-  await bullToken.setExcludedFromTax(bullBridge.address, true, {from: owner})
+  await bullToken.setExcludedFromTax(bullBridge.address, true)
 
   if(testingDeploy){
     // Mint NFTs
@@ -130,53 +131,53 @@ module.exports = async function (deployer, network, accounts) {
     let bullTrader = 6;
     let bullFarmer = 8;
 
-    await bullNFT.updateMiner(bullseye, owner, {from: owner});
-    await bullNFT.updateMiner(bullTrader, owner, {from: owner});
-    await bullNFT.updateMiner(bullFarmer, owner, {from: owner});
+    await bullNFT.updateMiner(bullseye, owner);
+    await bullNFT.updateMiner(bullTrader, owner);
+    await bullNFT.updateMiner(bullFarmer, owner);
 
-    await bullNFT.mint(bullFarmer, owner, {from: owner});
-    await bullNFT.mint(bullseye, testerA, {from: owner});
-    await bullNFT.mint(bullTrader, testerA, {from: owner});
-    await bullNFT.mint(bullFarmer, testerA, {from: owner});
+    await bullNFT.mint(bullFarmer, owner);
+    await bullNFT.mint(bullseye, testerA);
+    await bullNFT.mint(bullTrader, testerA);
+    await bullNFT.mint(bullFarmer, testerA);
     
-    await bullNFT.mint(bullseye, testerN, {from: owner});
-    await bullNFT.mint(bullTrader, testerN, {from: owner});
-    await bullNFT.mint(bullFarmer, testerN, {from: owner});
+    await bullNFT.mint(bullseye, testerN);
+    await bullNFT.mint(bullTrader, testerN);
+    await bullNFT.mint(bullFarmer, testerN);
     
-    await bullNFT.mint(bullseye, testerN2, {from: owner});
-    await bullNFT.mint(bullTrader, testerN2, {from: owner});
-    await bullNFT.mint(bullFarmer, testerN2, {from: owner});
+    await bullNFT.mint(bullseye, testerN2);
+    await bullNFT.mint(bullTrader, testerN2);
+    await bullNFT.mint(bullFarmer, testerN2);
     
-    await bullNFT.mint(bullseye, testerE, {from: owner});
-    await bullNFT.mint(bullTrader, testerE, {from: owner});
-    await bullNFT.mint(bullFarmer, testerE, {from: owner});
+    await bullNFT.mint(bullseye, testerE);
+    await bullNFT.mint(bullTrader, testerE);
+    await bullNFT.mint(bullFarmer, testerE);
     
-    await bullNFT.updateMiner(bullFarmer, masterchef.address, {from: owner});
+    await bullNFT.updateMiner(bullFarmer, masterchef.address);
 
     // Mint bull
-    await bullToken.mint(owner, toWei('5000000'), {from: owner})
-    await bullToken.mint(testerA, toWei('10000'), {from: owner})
-    await bullToken.mint(testerN, toWei('10000'), {from: owner})
-    await bullToken.mint(testerN2, toWei('10000'), {from: owner})
-    await bullToken.mint(testerE, toWei('10000'), {from: owner})
-    await busdToken.mint(owner, toWei('1000000'), {from: owner})
+    await bullToken.mint(owner, toWei('5000000'))
+    await bullToken.mint(testerA, toWei('10000'))
+    await bullToken.mint(testerN, toWei('10000'))
+    await bullToken.mint(testerN2, toWei('10000'))
+    await bullToken.mint(testerE, toWei('10000'))
+    await busdToken.mint(owner, toWei('1000000'))
 
     // Deposit rewards
-    await busdToken.approve(rewardDistribution.address, INT_MAX, {from: owner})
-    await rewardDistribution.depositRewards(toWei('500000'), {from: owner})
+    await busdToken.approve(rewardDistribution.address, INT_MAX)
+    await rewardDistribution.depositRewards(toWei('500000'))
 
     // Add pools
-    await masterchef.add(1000, bullToken.address, 0, 3600, 1, {from: owner})
-    await masterchef.add(1000, reward_token_address, 0, 0, 0, {from: owner})
+    await masterchef.add(1000, bullToken.address, 0, 3600, 1)
+    await masterchef.add(1000, reward_token_address, 0, 0, 0)
   }
 
-  await bullToken.transferOwnership(masterchef.address, {from: owner})
+  await bullToken.transferOwnership(masterchef.address)
 
   /* Config bridge */
 
-  await bullBridge.addToken(0, bullToken.address, (10**18).toString(), bridge_allowed_chains, {from: owner})
-  await bullBridge.updateOperator(operator, {from: owner})
-  await bullToken.transfer(bullBridge.address, toWei(100000), {from: owner})
+  await bullBridge.addToken(0, bullToken.address, (10**18).toString(), bridge_allowed_chains)
+  await bullBridge.updateOperator(operator)
+  await bullToken.transfer(bullBridge.address, toWei(100000))
 
   saveAs(data.toString(), network + " main contracts")
 };

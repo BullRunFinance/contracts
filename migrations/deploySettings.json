@@ -32,7 +32,6 @@
         "reward_token_address": ""
     },
     "accounts": {
-        "owner": "0x40e0B0196CC7a56D1558A38067f0171DDf05c55e",
         "operator": "0x27e74B3c51e68dD4C5E456fedC1ae4A0b90D02ec",
         "testerA": "0xDdaF8921e82d3f7EC6F6FF2A29a88a862422037b",
         "testerN": "0x16C4FED28eCf239ec0D1C502B931B4c9b13B8604",
