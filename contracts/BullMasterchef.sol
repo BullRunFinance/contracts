@@ -361,7 +361,8 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
         if (user.nftId == 0 &&
             (boostId == bullseye ||
              boostId == missedBull ||
-             boostId == bullFarmer)
+             boostId == bullFarmer ||
+             boostId == thePersistentBull)
              ){
             bullNFT.safeTransferFrom(address(msg.sender), address(this), _nftId);
             user.nftId = _nftId;
