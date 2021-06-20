@@ -80,12 +80,14 @@ contract BullBridge is Ownable, Pausable {
         require(address(tokens[_tokenId].token) != address(0), "Token not supported");
         require(tokens[_tokenId].enabledChains[_chainId], "Destination chain not supported");
 
-        if(!bullNFT.hasBoost(msg.sender, theBigBull)){
-            uint256 feeAmount = _amount.mul(fee).div(10000); 
-            _amount = _amount.sub(feeAmount);
-            tokens[_tokenId].token.safeTransferFrom(msg.sender, treasury, feeAmount);
+        if(address(bullNFT) != address(0)){
+            if(!bullNFT.hasBoost(msg.sender, theBigBull)){
+                uint256 feeAmount = _amount.mul(fee).div(10000); 
+                _amount = _amount.sub(feeAmount);
+                tokens[_tokenId].token.safeTransferFrom(msg.sender, treasury, feeAmount);
+            }
         }
-
+        
         tokens[_tokenId].token.safeTransferFrom(msg.sender, address(this), _amount);
 
         orders[nextOrderId] = Order (

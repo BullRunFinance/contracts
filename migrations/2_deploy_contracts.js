@@ -178,6 +178,7 @@ module.exports = async function (deployer, network, accounts) {
   await bullBridge.addToken(0, bullToken.address, (10**18).toString(), bridge_allowed_chains)
   await bullBridge.updateOperator(operator)
   await bullToken.transfer(bullBridge.address, toWei(100000))
+  await bullBridge.updateBullNFTContract(bullNFT.address)
 
   saveAs(data.toString(), network + " main contracts")
 };
