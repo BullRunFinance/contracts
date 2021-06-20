@@ -87,7 +87,7 @@ module.exports = async function (deployer, network, accounts) {
   const bullReferral = await BullReferral.deployed();
   pushData(bullReferral)
 
-  await deployer.deploy(BullBridge);
+  await deployer.deploy(BullBridge, bullNFT.address);
   const bullBridge = await BullBridge.deployed();
   pushData(bullBridge)
 
@@ -108,6 +108,8 @@ module.exports = async function (deployer, network, accounts) {
   await bullNFT.createBoost(bullBridge.address, 10, 10000); // 9 - theBigBull
 
   /* Config contracts */
+
+  await bullToken.updateBullNFTContract(bullNFT.address)
 
   await bullToken.setExcludedFromAntiWhale(owner, true)
 

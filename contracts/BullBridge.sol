@@ -57,7 +57,8 @@ contract BullBridge is Ownable, Pausable {
         _;
     }
 
-    constructor() public {
+    constructor(address _bullNFT) public {
+        bullNFT = IBullNFT(_bullNFT);
         treasury = msg.sender;
         operator = msg.sender;
     }
@@ -80,12 +81,10 @@ contract BullBridge is Ownable, Pausable {
         require(address(tokens[_tokenId].token) != address(0), "Token not supported");
         require(tokens[_tokenId].enabledChains[_chainId], "Destination chain not supported");
 
-        if(address(bullNFT) != address(0)){
-            if(!bullNFT.hasBoost(msg.sender, theBigBull)){
-                uint256 feeAmount = _amount.mul(fee).div(10000); 
-                _amount = _amount.sub(feeAmount);
-                tokens[_tokenId].token.safeTransferFrom(msg.sender, treasury, feeAmount);
-            }
+        if(!bullNFT.hasBoost(msg.sender, theBigBull)){
+            uint256 feeAmount = _amount.mul(fee).div(10000); 
+            _amount = _amount.sub(feeAmount);
+            tokens[_tokenId].token.safeTransferFrom(msg.sender, treasury, feeAmount);
         }
         
         tokens[_tokenId].token.safeTransferFrom(msg.sender, address(this), _amount);
@@ -105,7 +104,6 @@ contract BullBridge is Ownable, Pausable {
             bullTransfered[msg.sender] = bullTransfered[msg.sender].add(_amount);
             if(
                 bullTransfered[msg.sender] >= uint256(100000*10**18) &&
-                address(bullNFT) != address(0) && 
                 bullNFT.canMint(theBigBull) &&
                 bullNFT.getAuthorizedMiner(theBigBull) == address(this)
                 ){
