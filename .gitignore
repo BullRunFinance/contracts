@@ -1,5 +1,5 @@
 build/contracts
 node_modules
-.secret
+.secrets.json
 contracts/BullMarketplace.sol
 addresses*deployed/
