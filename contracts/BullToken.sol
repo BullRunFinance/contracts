@@ -92,7 +92,7 @@ contract BullToken is BEP20, BullGovernance {
         transferTaxRate = _transferTaxRate;
     }
 
-    constructor() public BEP20("BullFinance Token", "BULL") BullGovernance(address(this)) {
+    constructor() public BEP20("BullRun Token", "BULL") BullGovernance(address(this)) {
         _operator = _msgSender();
         lpLocker = _msgSender();
         emit OperatorTransferred(address(0), _operator);

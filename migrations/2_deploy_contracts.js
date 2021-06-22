@@ -44,11 +44,11 @@ module.exports = async function (deployer, network, accounts) {
   let { bridge_allowed_chains, masterchef_start_block, rewards_start_block, reward_token_address } = deploySettings[network]
 
   let owner = accounts[0]
-  let operator, testerA, testerN, testerN2, testerE
+  let operator, testerA, testerN, testerN2, testerE, testerR
   if(network == "develop"){
-    [operator, testerA, testerN, testerN2, testerE] = accounts
+    [operator, testerA, testerN, testerN2, testerE, testerR] = accounts
   }else{
-    ({ operator, testerA, testerN, testerN2, testerE } = deploySettings["accounts"])
+    ({ operator, testerA, testerN, testerN2, testerE, testerR } = deploySettings["accounts"])
   }
   
   let testingDeploy = !network.includes("mainnet") ? true : false
@@ -151,6 +151,10 @@ module.exports = async function (deployer, network, accounts) {
     await bullNFT.mint(bullseye, testerE);
     await bullNFT.mint(bullTrader, testerE);
     await bullNFT.mint(bullFarmer, testerE);
+
+    await bullNFT.mint(bullseye, testerR);
+    await bullNFT.mint(bullTrader, testerR);
+    await bullNFT.mint(bullFarmer, testerR);
     
     await bullNFT.updateMiner(bullFarmer, masterchef.address);
 
@@ -160,6 +164,7 @@ module.exports = async function (deployer, network, accounts) {
     await bullToken.mint(testerN, toWei('10000'))
     await bullToken.mint(testerN2, toWei('10000'))
     await bullToken.mint(testerE, toWei('10000'))
+    await bullToken.mint(testerR, toWei('10000'))
     await busdToken.mint(owner, toWei('1000000'))
 
     // Deposit rewards
