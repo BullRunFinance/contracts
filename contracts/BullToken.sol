@@ -45,13 +45,13 @@ contract BullToken is BEP20, BullGovernance {
     // In swap and liquify
     bool private _inSwapAndLiquify;
     // The operator can only update the transfer tax rate
-    address private _operator;
+    address public operator;
     // NFT address to manage boosts by BullNFTs
     IBullNFT public bullNFT;
     // NFT boostIds
-    uint256 goldenBull = 1;
-    uint256 silverBull = 2;
-    uint256 bronzeBull = 3;
+    uint256 constant goldenBull = 1;
+    uint256 constant silverBull = 2;
+    uint256 constant bronzeBull = 3;
 
     // Events
     event OperatorTransferred(address indexed previousOperator, address indexed newOperator);
@@ -64,7 +64,7 @@ contract BullToken is BEP20, BullGovernance {
     event SwapAndLiquify(uint256 tokensSwapped, uint256 ethReceived, uint256 tokensIntoLiqudity);
 
     modifier onlyOperator() {
-        require(_operator == msg.sender, "operator: caller is not the operator");
+        require(operator == msg.sender, "operator: caller is not the operator");
         _;
     }
 
@@ -92,10 +92,10 @@ contract BullToken is BEP20, BullGovernance {
         transferTaxRate = _transferTaxRate;
     }
 
-    constructor() public BEP20("BullRun Token", "BULL") BullGovernance(address(this)) {
-        _operator = _msgSender();
+    constructor() BEP20("BullRun Token", "BULL") BullGovernance(address(this)) {
+        operator = _msgSender();
         lpLocker = _msgSender();
-        emit OperatorTransferred(address(0), _operator);
+        emit OperatorTransferred(address(0), operator);
 
         _excludedFromAntiWhale[msg.sender] = true;
         _excludedFromAntiWhale[address(0)] = true;
@@ -105,7 +105,7 @@ contract BullToken is BEP20, BullGovernance {
     }
 
     /// @dev Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
-    function mint(address _to, uint256 _amount) public onlyOwner {
+    function mint(address _to, uint256 _amount) external onlyOwner {
         _mint(_to, _amount);
         _moveDelegates(address(0), _delegates[_to], _amount);
     }
@@ -129,8 +129,8 @@ contract BullToken is BEP20, BullGovernance {
     function _transfer(address sender, address recipient, uint256 amount) internal virtual override antiWhale(sender, recipient, amount) {
         // swap and liquify
         if (
-            swapAndLiquifyEnabled == true
-            && _inSwapAndLiquify == false
+            swapAndLiquifyEnabled
+            && !_inSwapAndLiquify
             && address(bullFinanceRouter) != address(0)
             && bullFinancePair != address(0)
             && sender != bullFinancePair
@@ -237,14 +237,14 @@ contract BullToken is BEP20, BullGovernance {
     /**
      * @dev Returns the address is excluded from antiWhale or not.
      */
-    function isExcludedFromAntiWhale(address _account) public view returns (bool) {
+    function isExcludedFromAntiWhale(address _account) external view returns (bool) {
         return _excludedFromAntiWhale[_account];
     }
 
     /**
      * @dev Returns the address is excluded from tax or not.
      */
-    function isExcludedFromTax(address _account) public view returns (bool) {
+    function isExcludedFromTax(address _account) external view returns (bool) {
         return _excludedFromTax[_account];
     }
 
@@ -255,7 +255,7 @@ contract BullToken is BEP20, BullGovernance {
      * @dev Update the transfer tax rate.
      * Can only be called by the current operator.
      */
-    function updateTransferTaxRate(uint16 _transferTaxRate) public onlyOperator {
+    function updateTransferTaxRate(uint16 _transferTaxRate) external onlyOperator {
         require(_transferTaxRate <= MAXIMUM_TRANSFER_TAX_RATE, "BULL::updateTransferTaxRate: Transfer tax rate must not exceed the maximum rate.");
         emit TransferTaxRateUpdated(msg.sender, transferTaxRate, _transferTaxRate);
         transferTaxRate = _transferTaxRate;
@@ -265,7 +265,7 @@ contract BullToken is BEP20, BullGovernance {
      * @dev Update the burn rate.
      * Can only be called by the current operator.
      */
-    function updateBurnRate(uint16 _burnRate) public onlyOperator {
+    function updateBurnRate(uint16 _burnRate) external onlyOperator {
         require(_burnRate <= 100, "BULL::updateBurnRate: Burn rate must not exceed the maximum rate.");
         emit BurnRateUpdated(msg.sender, burnRate, _burnRate);
         burnRate = _burnRate;
@@ -275,7 +275,7 @@ contract BullToken is BEP20, BullGovernance {
      * @dev Update the max balance amount rate.
      * Can only be called by the current operator.
      */
-    function updatemaxBalanceAmountRate(uint16 _maxBalanceAmountRate) public onlyOperator {
+    function updatemaxBalanceAmountRate(uint16 _maxBalanceAmountRate) external onlyOperator {
         require(_maxBalanceAmountRate <= 10000, "BULL::updatemaxBalanceAmountRate: Max transfer amount rate must not exceed the maximum rate.");
         emit maxBalanceAmountRateUpdated(msg.sender, maxBalanceAmountRate, _maxBalanceAmountRate);
         maxBalanceAmountRate = _maxBalanceAmountRate;
@@ -285,7 +285,7 @@ contract BullToken is BEP20, BullGovernance {
      * @dev Update the min amount to liquify.
      * Can only be called by the current operator.
      */
-    function updateMinAmountToLiquify(uint256 _minAmount) public onlyOperator {
+    function updateMinAmountToLiquify(uint256 _minAmount) external onlyOperator {
         emit MinAmountToLiquifyUpdated(msg.sender, minAmountToLiquify, _minAmount);
         minAmountToLiquify = _minAmount;
     }
@@ -294,7 +294,7 @@ contract BullToken is BEP20, BullGovernance {
      * @dev Exclude or include an address from antiWhale.
      * Can only be called by the current operator.
      */
-    function setExcludedFromAntiWhale(address _account, bool _excluded) public onlyOperator {
+    function setExcludedFromAntiWhale(address _account, bool _excluded) external onlyOperator {
         _excludedFromAntiWhale[_account] = _excluded;
     }
 
@@ -302,7 +302,7 @@ contract BullToken is BEP20, BullGovernance {
      * @dev Exclude or include an address from tax.
      * Can only be called by the current operator.
      */
-    function setExcludedFromTax(address _account, bool _excluded) public onlyOperator {
+    function setExcludedFromTax(address _account, bool _excluded) external onlyOperator {
         _excludedFromTax[_account] = _excluded;
     }
 
@@ -310,7 +310,7 @@ contract BullToken is BEP20, BullGovernance {
      * @dev Update the swapAndLiquifyEnabled.
      * Can only be called by the current operator.
      */
-    function updateSwapAndLiquifyEnabled(bool _enabled) public onlyOperator {
+    function updateSwapAndLiquifyEnabled(bool _enabled) external onlyOperator {
         emit SwapAndLiquifyEnabledUpdated(msg.sender, _enabled);
         swapAndLiquifyEnabled = _enabled;
     }
@@ -319,7 +319,7 @@ contract BullToken is BEP20, BullGovernance {
      * @dev Update the swap router.
      * Can only be called by the current operator.
      */
-    function updateBullFinanceRouter(address _router) public onlyOperator {
+    function updateBullFinanceRouter(address _router) external onlyOperator {
         bullFinanceRouter = IUniswapV2Router02(_router);
         bullFinancePair = IUniswapV2Factory(bullFinanceRouter.factory()).getPair(address(this), bullFinanceRouter.WETH());
         require(bullFinancePair != address(0), "BULL::updateBullFinanceRouter: Invalid pair address.");
@@ -343,19 +343,12 @@ contract BullToken is BEP20, BullGovernance {
     }
 
     /**
-     * @dev Returns the address of the current operator.
-     */
-    function operator() public view returns (address) {
-        return _operator;
-    }
-
-    /**
      * @dev Transfers operator of the contract to a new account (`newOperator`).
      * Can only be called by the current operator.
      */
     function transferOperator(address newOperator) public onlyOperator {
         require(newOperator != address(0), "BULL::transferOperator: new operator is the zero address");
-        emit OperatorTransferred(_operator, newOperator);
-        _operator = newOperator;
+        emit OperatorTransferred(operator, newOperator);
+        operator = newOperator;
     }
 }

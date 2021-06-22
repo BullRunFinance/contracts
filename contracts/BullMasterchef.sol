@@ -57,7 +57,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     }
 
     // The BULL TOKEN!
-    BullToken public bull;
+    BullToken public immutable bull;
     // Dev address.
     address public devAddress;
     // Deposit Fee address
@@ -74,27 +74,27 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     // Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
     // The block number when BULL mining starts.
-    uint256 public startBlock;
+    uint256 public immutable startBlock;
     // Total locked up rewards.
     uint256 public totalLockedUpRewards;
     // Reward distribution contract for fees.
     RewardDistribution public rewardDistribution;
     // Bull referral contract address.
-    IBullReferral public bullReferral;
+    IBullReferral public immutable bullReferral;
     // Referral commission rate in basis points.
     uint16 public referralCommissionRate = 200;
     // Max referral commission rate: 10%.
     uint16 public constant MAXIMUM_REFERRAL_COMMISSION_RATE = 1000;
     // NFTs boostsId bonus.
-    uint8 thePersistentBull = 4;
-    uint8 bullseye = 5;
-    uint8 missedBull = 6;
-    uint8 bullFarmer = 8;
+    uint8 constant thePersistentBull = 4;
+    uint8 constant bullseye = 5;
+    uint8 constant missedBull = 6;
+    uint8 constant bullFarmer = 8;
     // Conditions to mint new nfts
-    uint32 constant private TWO_DAYS = 2 days;  
-    uint256 constant private MINIMUM_REWARDS_FOR_NFT = 100 * 10**18;
+    uint32 constant TWO_DAYS = 2 days;  
+    uint256 constant MINIMUM_REWARDS_PER_NFT = 100 * 10**18;
     // NFT address to manage boosts by BullNFTs.
-    IBullNFT public bullNFT;
+    IBullNFT public immutable bullNFT;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
@@ -113,7 +113,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
         address _feeAddress,
         uint128 _bullPerBlock,
         uint256 _startBlock
-    ) public {
+    ) {
         bull = _bull;
         bullNFT = _bullNFT;
         bullReferral = _bullReferral;
@@ -136,7 +136,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
     /// @dev Avoid to create pool twice with same LP token address.
     mapping(IBEP20 => bool) public poolExistence;
     modifier nonDuplicated(IBEP20 _lpToken) {
-        require(poolExistence[_lpToken] == false, "nonDuplicated: duplicated");
+        require(!poolExistence[_lpToken], "nonDuplicated: duplicated");
         _;
     }
 
@@ -326,7 +326,7 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
 
                 // send rewards
                 safeBullTransfer(msg.sender, totalRewards);
-                if(totalRewards >= MINIMUM_REWARDS_FOR_NFT){
+                if(totalRewards >= MINIMUM_REWARDS_PER_NFT){
                     checkMintNFT(_pid, msg.sender);
                 }
                 if(rewardDistribution.poolExistence(_pid)){
@@ -434,11 +434,6 @@ contract Masterchef is ERC721Holder, Ownable, ReentrancyGuard {
         _massUpdatePools();
         bullPerBlock = _bullPerBlock;
         emit EmissionRateUpdated(msg.sender, bullPerBlock, _bullPerBlock);
-    }
-
-    /// @dev Update the bull referral contract address by the owner
-    function setBullReferral(IBullReferral _bullReferral) external onlyOwner {
-        bullReferral = _bullReferral;
     }
 
     /// @dev Update referral commission rate by the owner. Should be in basis points.

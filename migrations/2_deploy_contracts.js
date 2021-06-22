@@ -41,7 +41,7 @@ module.exports = async function (deployer, network, accounts) {
   let { rpcURL } = networkSettings[network]
   web3 = new Web3(rpcURL)
 
-  let { bridge_allowed_chains, masterchef_start_block, rewards_start_block, reward_token_address } = deploySettings[network]
+  let { bridge_allowed_chains, masterchef_start_block, rewards_start_block, rewards_end_block, reward_token_address } = deploySettings[network]
 
   let owner = accounts[0]
   let operator, testerA, testerN, testerN2, testerE, testerR
@@ -62,7 +62,8 @@ module.exports = async function (deployer, network, accounts) {
     reward_token_address = busdToken.address
 
     masterchef_start_block = await web3.eth.getBlockNumber();
-    rewards_start_block = await web3.eth.getBlockNumber() + 10000;
+    rewards_start_block = masterchef_start_block
+    rewards_end_block = await web3.eth.getBlockNumber() + 10000;
   }
 
   /* Deploy contracts */
@@ -83,7 +84,7 @@ module.exports = async function (deployer, network, accounts) {
   const masterchef = await Masterchef.deployed();
   pushData(masterchef)
 
-  await deployer.deploy(RewardDistribution, reward_token_address, masterchef.address, rewards_start_block);
+  await deployer.deploy(RewardDistribution, reward_token_address, masterchef.address, rewards_start_block, rewards_end_block);
   const rewardDistribution = await RewardDistribution.deployed();
   pushData(rewardDistribution)
 

@@ -5,6 +5,7 @@ pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./libs/SafeBEP20.sol";
 import "./libs/IBEP20.sol";
 
@@ -16,6 +17,7 @@ import "./libs/IBEP20.sol";
 
 contract RewardDistribution is Ownable {
     using SafeMath for uint256;
+    using Math for uint256;
     using SafeBEP20 for IBEP20;
 
     // Info of each user.
@@ -60,11 +62,11 @@ contract RewardDistribution is Ownable {
     // Last block when distribution rewards ends
     uint256 public endBlockRewards;
     // Reward token from fees to Liquidity providers
-    IBEP20 public rewardToken;
+    IBEP20 public immutable rewardToken;
     // Rewards already assigned to be distributed
     uint256 public assignedRewards;
     // Masterchef
-    address public masterchef;
+    address public immutable masterchef;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event DepositRewards(uint256 amount);
@@ -72,9 +74,10 @@ contract RewardDistribution is Ownable {
     event EmergencyRewardWithdraw(address indexed user, uint256 amount);
     event Harvest(address indexed user, uint256 indexed pid, uint256 amount);
 
-    constructor(IBEP20 _rewardToken, address _masterchef, uint256 _endBlockRewards) public {
+    constructor(IBEP20 _rewardToken, address _masterchef, uint256 _startBlock, uint256 _endBlockRewards) {
         rewardToken = _rewardToken;
         masterchef = _masterchef;
+        startBlock = _startBlock;
         endBlockRewards = _endBlockRewards;
     }
     
@@ -95,7 +98,7 @@ contract RewardDistribution is Ownable {
     }
 
     /// @dev Add a new lp to the pool. Can only be called by the owner.
-    function add(IBEP20 _lpToken, uint16 _pid) public onlyOwnerOrMasterchef nonDuplicated(_pid) {
+    function add(IBEP20 _lpToken, uint16 _pid) external onlyOwnerOrMasterchef nonDuplicated(_pid) {
         _massUpdatePools();
         uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
         totalAllocPoint = totalAllocPoint.add(100);
@@ -170,7 +173,7 @@ contract RewardDistribution is Ownable {
     /// It assumes that there is no fee involved. It's, the masterchef should send the amount after fees.
     /// @param _amount The amount to increment the balance
     /// @param _pid Pool identifier
-    function incrementBalance(uint16 _pid,uint256 _amount, address _user) public onlyMasterchef{
+    function incrementBalance(uint16 _pid,uint256 _amount, address _user) external onlyMasterchef{
         require(poolExistence[_pid], "pool not found");
         require(_amount > 0, "IncrementBalance error: amount should be more than zero.");
         PoolInfo storage pool = poolInfo[_pid];
@@ -184,7 +187,7 @@ contract RewardDistribution is Ownable {
     /// Reduce balance into the contract
     /// @param _amount The amount to reduce the balance
     /// @param _pid Pool identifier
-    function reduceBalance(uint16 _pid, uint256 _amount, address _user) public onlyMasterchef{
+    function reduceBalance(uint16 _pid, uint256 _amount, address _user) external onlyMasterchef{
         require(_amount > 0, "ReduceBalance error: amount should be more than zero.");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
@@ -203,7 +206,7 @@ contract RewardDistribution is Ownable {
     /// Wthdraw rewards
     /// Separated logic of any other withdraw() or reduceBalance() function to be more adaptable to the masterchef condition, as harvest intervals
     /// @param _pid Pool identifier
-    function harvest(uint16 _pid, address _user) public onlyMasterchef{
+    function harvest(uint16 _pid, address _user) external onlyMasterchef{
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         _updatePool(_pid);
@@ -243,7 +246,7 @@ contract RewardDistribution is Ownable {
     function updateRewardPerBlock() internal{
         uint256 rewardsAvailable = rewardToken.balanceOf(address(this)).sub(assignedRewards);
         require(block.number < endBlockRewards, "Rewards distribution finished");
-        rewardPerBlock = uint128(rewardsAvailable.div(endBlockRewards.sub(block.number)));
+        rewardPerBlock = uint128(rewardsAvailable.div(endBlockRewards.sub(block.number.max(startBlock))));
     }
 
     /// @dev Update last block to distribute rewards.
@@ -251,10 +254,6 @@ contract RewardDistribution is Ownable {
         _massUpdatePools();
         endBlockRewards = _endBlockReward;
         updateRewardPerBlock();
-    }
-
-    function updateMasterchef(address _masterchef) external onlyOwner{
-        masterchef = _masterchef;
     }
 
     /** @dev Withdraw reward tokens to owner. Function in case something goes wrong.

@@ -21,7 +21,7 @@ contract BullLocker is Ownable {
 
     event Unlocked(address indexed token, address indexed recipient, uint256 amount);
 
-    function unlock(IBEP20 _token, address _recipient) public onlyOwner{
+    function unlock(IBEP20 _token, address _recipient) external onlyOwner{
         require(_recipient != address(0), "BullLocker::unlock: ZERO address.");
 
         uint256 amount = _token.balanceOf(address(this));

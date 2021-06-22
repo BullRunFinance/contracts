@@ -23,15 +23,15 @@ contract BullVoteProxy {
     using SafeMath for uint256;
 
     // Bull Token
-    address public bull;
+    address public immutable bull;
     // Master Chef
-    address public masterChef;
-    uint256 public bullPoolPid;
+    address public immutable masterChef;
+    uint256 public immutable bullPoolPid;
     // Trading Pairs
-    address public bullBNB;
-    uint256 public bullBNBFarmPid;
-    address public bullBUSD ;
-    uint256 public bullBUSDFarmPid;
+    address public immutable bullBNB;
+    uint256 public immutable bullBNBFarmPid;
+    address public immutable bullBUSD ;
+    uint256 public immutable bullBUSDFarmPid;
 
     constructor (
         address _bull,
@@ -41,7 +41,7 @@ contract BullVoteProxy {
         uint256 _bullBNBFarmPid,
         address _bullBUSD,
         uint256 _bullBUSDFarmPid
-    ) public {
+    ) {
         bull = _bull;
         masterChef = _masterChef;
         bullPoolPid = _bullPoolPid;

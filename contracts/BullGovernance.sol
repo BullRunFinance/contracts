@@ -46,7 +46,7 @@ contract BullGovernance {
 
     IBEP20 bullToken;
 
-    constructor(address _bullToken) public {
+    constructor(address _bullToken) {
         bullToken = IBEP20(_bullToken); 
     }
 

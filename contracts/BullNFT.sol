@@ -38,7 +38,7 @@ contract BullNFT is ERC721Enumerable, Ownable, IBullNFT {
         _;
     }
 
-    constructor() public ERC721("BullNFT", "Bull NFT") {}
+    constructor() ERC721("BullNFT", "Bull NFT") {}
 
     /// @dev Mint a new nft with a given _boostId to the _to address.
     function mint(uint256 _boostId, address _to) external override onlyMiner(_boostId){
@@ -65,7 +65,7 @@ contract BullNFT is ERC721Enumerable, Ownable, IBullNFT {
     }
 
     /// @return Return true if a _user has some nft with the given _boostId.
-    function hasBoost(address _user, uint256 _boostId) public override view returns(bool){
+    function hasBoost(address _user, uint256 _boostId) external override view returns(bool){
         uint256 balance = balanceOf(_user);
         for(uint256 i = 0; i < balance; i++){
             if(boostById[tokenOfOwnerByIndex(_user, i)] == _boostId){

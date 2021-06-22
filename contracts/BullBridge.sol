@@ -57,7 +57,7 @@ contract BullBridge is Ownable, Pausable {
         _;
     }
 
-    constructor(address _bullNFT) public {
+    constructor(address _bullNFT) {
         bullNFT = IBullNFT(_bullNFT);
         treasury = msg.sender;
         operator = msg.sender;

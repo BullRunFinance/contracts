@@ -34,10 +34,10 @@ contract("RewardDistribution", ([owner, investor, referrer]) => {
     testToken = await TestToken.new()
     bullNFT = await BullNFT.new()
     blockNumber = await web3.eth.getBlockNumber();
-    masterchef = await Masterchef.new(bullToken.address, bullNFT.address, investor, (20*10**18).toString(), blockNumber)
-//    console.log("Actual block: ", blockNumber)
-    rewardDistribution = await RewardDistribution.new(busdToken.address, masterchef.address, blockNumber + 150)
     bullReferral = await BullReferral.new()
+    masterchef = await Masterchef.new(bullToken.address, bullNFT.address, bullReferral.address,investor, (20*10**18).toString(), blockNumber)
+//    console.log("Actual block: ", blockNumber)
+    rewardDistribution = await RewardDistribution.new(busdToken.address, masterchef.address, blockNumber, blockNumber + 10000)
   })
 
   describe("Mint tokens", async() =>{
@@ -69,13 +69,6 @@ contract("RewardDistribution", ([owner, investor, referrer]) => {
       await bullToken.setExcludedFromAntiWhale(masterchef.address, true)
       assert.equal(await bullToken.isExcludedFromAntiWhale(masterchef.address), true)
     })
-
-    // Arm LP BULL-BNB
-    // Exclude LP from antiwhale
-    // Exclude pancakeRouter from antiwhale
-    /******************* ****/
-    // Assign bull.bullSwapRouter = pancakeRouter
-    /************************ */
   })
 
   describe("Config distribution contract", async() => {
@@ -89,9 +82,6 @@ contract("RewardDistribution", ([owner, investor, referrer]) => {
     it("set contracts", async() => {
       await masterchef.setRewardDistribution(rewardDistribution.address, {from: owner})
       assert.equal(await masterchef.rewardDistribution(), rewardDistribution.address)
-
-      await masterchef.setBullReferral(bullReferral.address, {from: owner})
-      assert.equal(await masterchef.bullReferral(), bullReferral.address)
     })
 
     it("assign bullToken ownership", async() => {
