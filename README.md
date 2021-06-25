@@ -28,4 +28,4 @@ The protocol will be deployed in several chains, starting with BSC, Polygon and 
 * @uniswap/v2-core@1.0.1
 
 ---
-> BullToken, BullMasterchef, BullReferral and BullLocker are forks from  [PantherSwap](https://github.com/pantherswap/panther-farm) with changes applied to them to increase security and usability.
+> Contracts audited by Hacken at 25/06/2021 https://hacken.io/wp-content/uploads/2021/06/BullRunFinance_25062021SCAudit_Report_2.pdf
