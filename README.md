@@ -28,4 +28,4 @@ The protocol will be deployed in several chains, starting with BSC, Polygon and 
 * @uniswap/v2-core@1.0.1
 
 ---
-> Contracts audited by Hacken at 25/06/2021 https://hacken.io/wp-content/uploads/2021/06/BullRunFinance_25062021SCAudit_Report_2.pdf
+> Contracts audited by [Hacken](https://hacken.io/wp-content/uploads/2021/06/BullRunFinance_25062021SCAudit_Report_2.pdf) at 25/06/2021
