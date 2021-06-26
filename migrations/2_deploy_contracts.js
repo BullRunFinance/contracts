@@ -44,11 +44,11 @@ module.exports = async function (deployer, network, accounts) {
   let { bridge_allowed_chains, masterchef_start_block, rewards_start_block, rewards_end_block, reward_token_address } = deploySettings[network]
 
   let owner = accounts[0]
-  let operator, testerA, testerN, testerN2, testerE, testerR
+  let operator, testerA, testerN, testerN2, testerE, testerR, router
   if(network == "develop"){
-    [operator, testerA, testerN, testerN2, testerE, testerR] = accounts
+    [operator, testerA, testerN, testerN2, testerE, testerR, router] = accounts
   }else{
-    ({ operator, testerA, testerN, testerN2, testerE, testerR } = deploySettings["accounts"])
+    ({ operator, testerA, testerN, testerN2, testerE, testerR, router } = deploySettings["accounts"])
   }
   
   let testingDeploy = !network.includes("mainnet") ? true : false
@@ -125,6 +125,8 @@ module.exports = async function (deployer, network, accounts) {
   await bullToken.setExcludedFromAntiWhale(bullBridge.address, true)
 
   await bullToken.setExcludedFromTax(bullBridge.address, true)
+
+  await bullToken.setExcludedFromAntiWhale(router, true)
 
   if(testingDeploy){
     // Mint NFTs

@@ -1,6 +1,7 @@
 {
     "develop": {
-        "bridge_allowed_chains": []
+        "bridge_allowed_chains": [],
+        "router": "0xD99D1c33F9fC3444f8101754aBC46c52416550D1"
     },
     "bsc_testnet": {
       "bridge_allowed_chains": [80001, 4002],
@@ -11,25 +12,30 @@
         "bridge_allowed_chains": [137],
         "masterchef_start_block": 0,
         "rewards_start_block": 0,
-        "reward_token_address": ""
+        "reward_token_address": "",
+        "router": "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73"
     },
     "polygon_testnet":{
-        "bridge_allowed_chains": [97, 4002]
+        "bridge_allowed_chains": [97, 4002],
+        "router": "0x0000000000000000000000000000000000000000"
     },
     "polygon_mainnet":{
         "bridge_allowed_chains": [56],
         "masterchef_start_block": 0,
         "rewards_start_block": 0,
-        "reward_token_address": ""
+        "reward_token_address": "",
+        "router": "0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32"
     },
     "fantom_testnet":{
-        "bridge_allowed_chains": [97, 80001]
+        "bridge_allowed_chains": [97, 80001],
+        "router": "0x0000000000000000000000000000000000000000"
     },
     "fantom_mainnet":{
         "bridge_allowed_chains": [56],
         "masterchef_start_block": 0,
         "rewards_start_block": 0,
-        "reward_token_address": ""
+        "reward_token_address": "",
+        "router": "0x152eE697f2E276fA89E96742e9bB9aB1F2E61bE3"
     },
     "accounts": {
         "operator": "0x27e74B3c51e68dD4C5E456fedC1ae4A0b90D02ec",
