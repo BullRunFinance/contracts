@@ -112,7 +112,7 @@ contract BullBridge is Ownable, Pausable {
         }
     }
 
-    function completeCrossTransfer(uint8 _tokenId, address _to, uint256 _amount, uint256 _originChain, uint256 _orderId) external onlyOperator whenNotPaused{
+    function completeCrossTransfer(uint8 _tokenId, address _to, uint256 _amount) external onlyOperator whenNotPaused{
         require(tokens[_tokenId].token.balanceOf(address(this)) >= _amount, "Insufficient balance");
         tokens[_tokenId].token.safeTransfer(_to, _amount);
     }
