@@ -6,6 +6,7 @@ const BullReferral = artifacts.require("BullReferral");
 const BullNFT = artifacts.require("BullNFT");
 const BullBridge = artifacts.require("BullBridge");
 const BullMarketplace = artifacts.require("BullMarketplace");
+const BullLocker = artifacts.require("BullLocker");
 
 const networkSettings = require('./networkSettings.json')
 const Web3 = require('web3')
@@ -72,6 +73,10 @@ module.exports = async function (deployer, network, accounts) {
   const bullToken = await BullToken.deployed();
   pushData(bullToken)
 
+  await deployer.deploy(BullLocker);
+  const bullLocker = await BullLocker.deployed();
+  pushData(bullLocker)
+
   await deployer.deploy(BullNFT);
   const bullNFT = await BullNFT.deployed();
   pushData(bullNFT)
@@ -109,6 +114,8 @@ module.exports = async function (deployer, network, accounts) {
   await bullNFT.createBoost(bullBridge.address, 10, 10000); // 9 - theBigBull
 
   /* Config contracts */
+
+  await bullToken.updateLpLocker(bullLocker.address)
 
   await bullToken.updateBullNFTContract(bullNFT.address)
 

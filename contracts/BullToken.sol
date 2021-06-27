@@ -39,7 +39,7 @@ contract BullToken is BEP20, BullGovernance {
     // The swap router, modifiable
     IUniswapV2Router02 public bullFinanceRouter;
     // LP Locker
-    address lpLocker;
+    address public lpLocker;
     // The trading pair
     address public bullFinancePair;
     // In swap and liquify
