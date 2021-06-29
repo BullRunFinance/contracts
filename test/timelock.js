@@ -130,6 +130,53 @@ contract("Masterchef", async([owner, investor, referrer]) => {
       await processTransaction('execute', masterchef.address)
 
       assert.equal((await masterchef.poolLength()).toString(), 1)
+      assert.equal((await masterchef.poolInfo(0)).lpToken, bullToken.address)
+      assert.equal((await masterchef.poolInfo(0)).harvestInterval, harvestInterval)
+    })
+
+    it("queue add pool busdToken", async() => {
+      allocPoint = '1000'
+      depositFee = '400'
+      harvestInterval = '7200'
+      blockNumber = await web3.eth.getBlockNumber()
+      eta = (await web3.eth.getBlock(blockNumber)).timestamp + 21650
+      signature = 'add(uint32,address,uint16,uint32,bool)'
+
+      packedArgs = web3.eth.abi.encodeParameters(
+        ['uint32', 'address', 'uint16', 'uint32', 'bool'], 
+        [
+          allocPoint, 
+          busdToken.address, 
+          depositFee,
+          harvestInterval, 
+          'true'
+        ]
+      )
+      txHash = await web3.utils.soliditySha3(packedArgs)
+
+      assert(!(await timelock.queuedTransactions(txHash)), "Queue transaction error.")
+
+      await processTransaction('queue', masterchef.address)
+
+      assert((await timelock.queuedTransactions(txHash)).toString(), "Transaction hasn't been queued.")
+    })
+
+    it("execute add pool busdToken", async() => {
+      assert.equal((await masterchef.poolLength()).toString(), 1)
+
+      await expectRevert(
+        processTransaction('execute', masterchef.address),
+        "Timelock::executeTransaction: Transaction hasn't surpassed time lock."
+      )
+
+      await helper.advanceTimeAndBlock(21650)
+
+      await processTransaction('execute', masterchef.address)
+
+      assert.equal((await masterchef.poolLength()).toString(), 2)
+      assert.equal((await masterchef.poolInfo(1)).lpToken, busdToken.address)
+      assert.equal(parseInt((await masterchef.poolInfo(1)).depositFeeBP), depositFee)
+      assert.equal(parseInt((await masterchef.poolInfo(1)).harvestInterval), harvestInterval)
     })
   })
 
