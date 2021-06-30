@@ -42,14 +42,14 @@ module.exports = async function (deployer, network, accounts) {
   let { rpcURL } = networkSettings[network]
   web3 = new Web3(rpcURL)
 
-  let { bridge_allowed_chains, masterchef_start_block, rewards_start_block, rewards_end_block, reward_token_address } = deploySettings[network]
+  let { bridge_allowed_chains, masterchef_start_block, rewards_start_block, rewards_end_block, reward_token_address, router, emission_per_block} = deploySettings[network]
 
   let owner = accounts[0]
-  let operator, testerA, testerN, testerN2, testerE, testerR, router
+  let operator, testerA, testerN, testerN2, testerE, testerR, testerT
   if(network == "develop"){
-    [operator, testerA, testerN, testerN2, testerE, testerR, router] = accounts
+    [operator, testerA, testerN, testerN2, testerE, testerR, testerT] = accounts
   }else{
-    ({ operator, testerA, testerN, testerN2, testerE, testerR, router } = deploySettings["accounts"])
+    ({ operator, testerA, testerN, testerN2, testerE, testerR, testerT } = deploySettings["accounts"])
   }
   
   let testingDeploy = !network.includes("mainnet") ? true : false
@@ -65,6 +65,7 @@ module.exports = async function (deployer, network, accounts) {
     masterchef_start_block = await web3.eth.getBlockNumber();
     rewards_start_block = masterchef_start_block
     rewards_end_block = await web3.eth.getBlockNumber() + 10000;
+    emission_per_block = (20*10**18).toString()
   }
 
   /* Deploy contracts */
@@ -85,7 +86,7 @@ module.exports = async function (deployer, network, accounts) {
   const bullReferral = await BullReferral.deployed();
   pushData(bullReferral)
 
-  await deployer.deploy(Masterchef, bullToken.address, bullNFT.address, bullReferral.address, owner, (20*10**18).toString(), masterchef_start_block);
+  await deployer.deploy(Masterchef, bullToken.address, bullNFT.address, bullReferral.address, owner, emission_per_block, masterchef_start_block);
   const masterchef = await Masterchef.deployed();
   pushData(masterchef)
 
@@ -101,7 +102,9 @@ module.exports = async function (deployer, network, accounts) {
   const bullMarketplace = await BullMarketplace.deployed();
   pushData(bullMarketplace)
 
-  /* Create NFTs */
+  saveAs(data.toString(), network + " main contracts")
+
+  // Create NFTs 
 
   await bullNFT.createBoost(owner, 10, 5000); // 1 - goldeBull
   await bullNFT.createBoost(owner, 10, 2500); // 2 - silverBull
@@ -113,7 +116,7 @@ module.exports = async function (deployer, network, accounts) {
   await bullNFT.createBoost(masterchef.address, 10, 3000); // 8 -  bullFarmer
   await bullNFT.createBoost(bullBridge.address, 10, 10000); // 9 - theBigBull
 
-  /* Config contracts */
+  // Config contracts 
 
   await bullToken.updateLpLocker(bullLocker.address)
 
@@ -122,6 +125,10 @@ module.exports = async function (deployer, network, accounts) {
   await bullToken.setExcludedFromAntiWhale(owner, true)
 
   await bullToken.setExcludedFromTax(owner, true)
+
+  await bullToken.setExcludedFromAntiWhale(bullToken.address, true)
+
+  await bullToken.setExcludedFromTax(bullToken.address, true)
 
   await bullToken.setExcludedFromAntiWhale(masterchef.address, true)
 
@@ -135,14 +142,14 @@ module.exports = async function (deployer, network, accounts) {
 
   await bullToken.setExcludedFromAntiWhale(router, true)
 
+  await bullToken.mint(owner, toWei('1225000'))
+
   if(testingDeploy){
     // Mint NFTs
     let bullseye = 5;
     let bullTrader = 6;
     let bullFarmer = 8;
 
-    await bullNFT.updateMiner(bullseye, owner);
-    await bullNFT.updateMiner(bullTrader, owner);
     await bullNFT.updateMiner(bullFarmer, owner);
 
     await bullNFT.mint(bullFarmer, owner);
@@ -169,12 +176,12 @@ module.exports = async function (deployer, network, accounts) {
     await bullNFT.updateMiner(bullFarmer, masterchef.address);
 
     // Mint bull
-    await bullToken.mint(owner, toWei('5000000'))
-    await bullToken.mint(testerA, toWei('10000'))
-    await bullToken.mint(testerN, toWei('10000'))
-    await bullToken.mint(testerN2, toWei('10000'))
-    await bullToken.mint(testerE, toWei('10000'))
-    await bullToken.mint(testerR, toWei('10000'))
+    await bullToken.mint(testerA, toWei('2500'))
+    await bullToken.mint(testerN, toWei('2500'))
+    await bullToken.mint(testerN2, toWei('2500'))
+    await bullToken.mint(testerE, toWei('2500'))
+    await bullToken.mint(testerR, toWei('2500'))
+    await bullToken.mint(testerT, toWei('2500'))
     await busdToken.mint(owner, toWei('1000000'))
 
     // Deposit rewards
@@ -188,12 +195,12 @@ module.exports = async function (deployer, network, accounts) {
 
   await bullToken.transferOwnership(masterchef.address)
 
-  /* Config bridge */
+  // Config bridge 
 
   await bullBridge.addToken(0, bullToken.address, (10**18).toString(), bridge_allowed_chains)
   await bullBridge.updateOperator(operator)
   await bullToken.transfer(bullBridge.address, toWei(100000))
   await bullBridge.updateBullNFTContract(bullNFT.address)
 
-  saveAs(data.toString(), network + " main contracts")
+
 };

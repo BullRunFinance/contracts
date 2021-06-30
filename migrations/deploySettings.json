@@ -9,33 +9,39 @@
       "weth": "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"
     },
     "bsc_mainnet":{
-        "bridge_allowed_chains": [137],
-        "masterchef_start_block": 0,
-        "rewards_start_block": 0,
-        "reward_token_address": "",
-        "router": "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73"
+        "bridge_allowed_chains": [137, 250],
+        "masterchef_start_block": 8731637,
+        "rewards_start_block": 8741637,
+        "rewards_end_block": 8841637,
+        "reward_token_address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+        "router": "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+        "emission_per_block": "9760000000000000000"
     },
     "polygon_testnet":{
         "bridge_allowed_chains": [97, 4002],
         "router": "0x0000000000000000000000000000000000000000"
     },
     "polygon_mainnet":{
-        "bridge_allowed_chains": [56],
-        "masterchef_start_block": 0,
-        "rewards_start_block": 0,
-        "reward_token_address": "",
-        "router": "0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32"
+        "bridge_allowed_chains": [56, 250],
+        "masterchef_start_block": 16304700,
+        "rewards_start_block": 16404700,
+        "rewards_end_block": 17404700,
+        "reward_token_address": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+        "router": "0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff",
+        "emission_per_block": "11570000000000000000"
     },
     "fantom_testnet":{
         "bridge_allowed_chains": [97, 80001],
         "router": "0x0000000000000000000000000000000000000000"
     },
     "fantom_mainnet":{
-        "bridge_allowed_chains": [56],
-        "masterchef_start_block": 0,
-        "rewards_start_block": 0,
-        "reward_token_address": "",
-        "router": "0x152eE697f2E276fA89E96742e9bB9aB1F2E61bE3"
+        "bridge_allowed_chains": [56, 80001],
+        "masterchef_start_block": 10946563,
+        "rewards_start_block": 10986563,
+        "rewards_end_block": 12986563,
+        "reward_token_address": "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83",
+        "router": "0xF491e7B69E4244ad4002BC14e878a34207E38c29",
+        "emission_per_block": "280000000000000000"
     },
     "accounts": {
         "operator": "0x27e74B3c51e68dD4C5E456fedC1ae4A0b90D02ec",

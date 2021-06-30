@@ -43,7 +43,7 @@ module.exports = {
     bsc_testnet: {
       provider: () => new HDWalletProvider(mnemonic, `https://data-seed-prebsc-1-s1.binance.org:8545`),
       network_id: 97,
-      confirmations: 10,
+      confirmations: 2,
       timeoutBlocks: 200,
       skipDryRun: true,
       apiKey: bscscanApiKey
@@ -51,7 +51,7 @@ module.exports = {
     bsc_mainnet: {
       provider: () => new HDWalletProvider(mnemonic, `https://bsc-dataseed1.binance.org`),
       network_id: 56,
-      confirmations: 10,
+      confirmations: 5,
       timeoutBlocks: 200,
       skipDryRun: true,
       apiKey: bscscanApiKey
@@ -64,16 +64,15 @@ module.exports = {
       skipDryRun: true
     },
     polygon_mainnet: {
-      provider: () => new HDWalletProvider(mnemonic, `https://rpc-mainnet.matic.network`),
+      provider: () => new HDWalletProvider(mnemonic, `https://polygon-mainnet.infura.io/v3/` + infuraKey),
       network_id: 137,
-      confirmations: 2,
+      gasPrice: "20000000000",
       timeoutBlocks: 200,
       skipDryRun: true
     },
     fantom_mainnet: {
       provider: () => new HDWalletProvider(mnemonic, `https://rpcapi.fantom.network`),
       network_id: 250,
-      confirmations: 10,
       timeoutBlocks: 200,
       skipDryRun: true
     },
@@ -84,11 +83,6 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true
     },
-  },
-
-  // Set default mocha options here, use special reporters etc.
-  mocha: {
-    // timeout: 100000
   },
 
   // Configure your compilers
