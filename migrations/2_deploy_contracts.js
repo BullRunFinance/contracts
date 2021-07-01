@@ -142,6 +142,8 @@ module.exports = async function (deployer, network, accounts) {
 
   await bullToken.setExcludedFromAntiWhale(router, true)
 
+  await bullToken.setExcludedFromAntiWhale("0x000000000000000000000000000000000000dEaD", true)
+
   await bullToken.mint(owner, toWei('1225000'))
 
   if(testingDeploy){

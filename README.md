@@ -5,14 +5,16 @@ The protocol will be deployed in several chains, starting with BSC, Polygon and 
 
 ## Main contracts
 
-* **BullToken**: [deploy after audits]()
-* **BullMasterchef**: [deploy after audits]()
-* **RewardDistribution**: [deploy after audits]()
-* **BullReferral**: [deploy after audits]()
-* **BullLocker**: [deploy after audits]()
-* **BullBridge**: [deploy after audits]()
-* **BullMarketplace**: [under development]()
-* **BullNFT**: [deploy after audits]()
+* **BullToken**: 0xeDd4b24BE3c43De98989C233E67dB29Dc6554fC6
+* **BullMasterchef**: 0x10712a6d1B8C0de4c5172A3004A8AeE20569c670
+* **RewardDistribution**: 0x1B2379af4F00945e6Fe5FE6657a297bE1d57A059
+* **BullReferral**: 0x66351a42D6e4851b21e2B2cF1D4334Eb264D4Ac5
+* **BullLocker**: 0x5DF3B5c3bFb687F56887F93F684f92A9545bEeFB
+* **BullBridge**: 0xa4f9A8D5000943c0e35b4d3730EdcA89a9CeEC56
+* **BullMarketplace**: 0x6399c48C5d74BE900034E283C9488a02A716A757
+* **BullNFT**: 0xb86553EA267814BC73c676F78f6E0387FA093Eb6
+
+Contracts deployed on Binance Smart Chain, Polygon and Fantom with the same addresses.
 
 ## Overview core contracts
 

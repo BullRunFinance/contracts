@@ -21,7 +21,7 @@
  const HDWalletProvider = require('@truffle/hdwallet-provider');
  const fs = require('fs');
 
- const { mnemonic, bscscanApiKey, etherscanKey, infuraKey } = require('./.secrets.json');
+ const { mnemonic, bscscanApiKey, polygonscanApiKey, ftmscanApiKey, etherscanKey, infuraKey } = require('./.secrets.json');
 
 module.exports = {
   /**
@@ -33,8 +33,15 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
-
-   networks: {
+  plugins: [
+    'truffle-plugin-verify'
+  ],
+  api_keys: {
+    bscscan: bscscanApiKey,
+    ftmscan: ftmscanApiKey,
+    polygonscan: polygonscanApiKey
+  },
+  networks: {
     development: {
      host: "127.0.0.1",     // Localhost (default: none)
      port: 9545,            // Standard Ethereum port (default: none)
@@ -66,15 +73,17 @@ module.exports = {
     polygon_mainnet: {
       provider: () => new HDWalletProvider(mnemonic, `https://polygon-mainnet.infura.io/v3/` + infuraKey),
       network_id: 137,
-      gasPrice: "20000000000",
+      gasPrice: "40000000000",
       timeoutBlocks: 200,
-      skipDryRun: true
+      skipDryRun: true,
+      apiKey: polygonscanApiKey
     },
     fantom_mainnet: {
       provider: () => new HDWalletProvider(mnemonic, `https://rpcapi.fantom.network`),
       network_id: 250,
       timeoutBlocks: 200,
-      skipDryRun: true
+      skipDryRun: true,
+      apiKey: ftmscanApiKey
     },
     fantom_testnet: {
       provider: () => new HDWalletProvider(mnemonic, `https://rpc.testnet.fantom.network`),
