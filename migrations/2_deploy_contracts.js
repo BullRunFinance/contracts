@@ -69,7 +69,7 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   /* Deploy contracts */
-
+  
   await deployer.deploy(BullToken);
   const bullToken = await BullToken.deployed();
   pushData(bullToken)

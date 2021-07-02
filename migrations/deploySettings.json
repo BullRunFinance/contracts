@@ -35,7 +35,7 @@
         "router": "0x0000000000000000000000000000000000000000"
     },
     "fantom_mainnet":{
-        "bridge_allowed_chains": [56, 80001],
+        "bridge_allowed_chains": [56, 137],
         "masterchef_start_block": 11231107,
         "rewards_start_block": 11403907,
         "rewards_end_block": 13995907,

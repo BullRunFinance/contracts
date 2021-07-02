@@ -13,6 +13,7 @@ The protocol will be deployed in several chains, starting with BSC, Polygon and 
 * **BullBridge**: 0xa4f9A8D5000943c0e35b4d3730EdcA89a9CeEC56
 * **BullMarketplace**: 0x6399c48C5d74BE900034E283C9488a02A716A757
 * **BullNFT**: 0xb86553EA267814BC73c676F78f6E0387FA093Eb6
+* **Timelock**: 0xafa2F30f760dBd4f3aD109954BC8673Bb42C0EEa
 
 Contracts deployed on Binance Smart Chain, Polygon and Fantom with the same addresses.
 
